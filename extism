@@ -191,7 +191,7 @@ class ExtismBuilder:
         if not os.path.exists(path):
             return
 
-        with open() as f:
+        with open(path) as f:
             j = json.loads(f.read())
             for k, v in j.items():
                 self.__setattr__(k, v)
