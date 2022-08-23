@@ -4,6 +4,14 @@ The `extism` CLI is used to manage [Extism](https://github.com/extism/extism) in
 
 ## Install
 
+Using curl:
+
 ```sh
-$ curl -O https://github.com/extism/cli/blob/main/extism
+$ curl https://raw.githubusercontent.com/extism/cli/blob/main/install.sh | sh
+```
+
+Using pip:
+
+```sh
+$ pip3 install git+https://github.com/extism/cli
 ```
