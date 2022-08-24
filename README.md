@@ -15,3 +15,18 @@ Using pip:
 ```sh
 $ pip3 install git+https://github.com/extism/cli
 ```
+
+## Usage
+
+The simplest use-case is to download an build the source code then install the library and header file into 
+the installation prefix of your choice.
+
+```sh
+$ extism install # install to ~/.local/lib and ~/.local/include
+```
+
+By default the prefix is `~/.local`, but it can easily be configured:
+
+```sh
+$ extism --prefix /usr/local install
+```

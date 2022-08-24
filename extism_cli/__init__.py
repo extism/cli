@@ -25,6 +25,8 @@ remote_http = "https://github.com/extism/hacking-examples"
 
 
 def cp(src: str, dest: str, sudo: bool = False):
+    if dest.startswith("/usr/"):
+        sudo = True
     """Copy a file, optionally using sudo"""
     if sudo:
         subprocess.run(["sudo", "cp", src, dest])
