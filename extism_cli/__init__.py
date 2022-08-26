@@ -18,8 +18,8 @@ home_local = os.path.join(home_path, ".local")
 extism_path = os.getenv("EXTISM_PATH", os.path.join(home_path, ".extism"))
 tmp_path = tempfile.gettempdir()
 
-remote_ssh = "git@github.com:extism/hacking-examples"
-remote_http = "https://github.com/extism/hacking-examples"
+remote_ssh = "git@github.com:extism/extism"
+remote_http = "https://github.com/extism/extsim"
 
 # Utils
 
@@ -179,7 +179,7 @@ class ExtismBuilder:
 
     def _init(self):
         if hasattr(self, "source_path"):
-            self.runtime_path = os.path.join(self.source_path, "core")
+            self.runtime_path = os.path.join(self.source_path, "runtime")
 
     def save_config(self, version: Optional[str] = None):
         """Save config to disk"""
@@ -208,7 +208,7 @@ class ExtismBuilder:
     def releases(self, token: Optional[str] = None):
         """Get a list of all releases"""
         req = request.Request(
-            url="https://api.github.com/repos/extism/hacking-examples/releases",
+            url="https://api.github.com/repos/extism/extism/releases",
             method="GET",
         )
         req.add_header("Accept", "application/vnd.github+json")
