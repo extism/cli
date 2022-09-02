@@ -7,7 +7,7 @@ The `extism` CLI is used to manage [Extism](https://github.com/extism/extism) in
 Using curl:
 
 ```sh
-$ curl https://raw.githubusercontent.com/extism/cli/blob/main/install.sh | sh
+$ curl https://raw.githubusercontent.com/extism/cli/main/install.sh | sh
 ```
 
 Using pip:
@@ -28,5 +28,5 @@ $ extism install # install to ~/.local/lib and ~/.local/include
 By default the prefix is `~/.local`, but it can easily be configured:
 
 ```sh
-$ extism --prefix /usr/local install
+$ extism --sudo --prefix /usr/local install
 ```
