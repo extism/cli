@@ -269,51 +269,50 @@ class ExtismBuilder:
         """
         Download a release from Github
         """
-        versions = os.path.join(extism_path, "versions")
-        version_path = os.path.join(versions, release["tag_name"])
-        if os.path.exists(version_path):
+        cache = os.path.join(extism_path, "cache")
+        cache_path = os.path.join(cache, release["tag_name"])
+        if os.path.exists(cache_path):
             return
 
-        os.makedirs(versions, exist_ok=True)
+        os.makedirs(cache, exist_ok=True)
 
         asset_prefix = self.system.asset_prefix(libc=libc)
         url = None
+        found = []
         for asset in release["assets"]:
+            if '.txt' not in asset['name']:
+                found.append(asset["name"])
             if asset["name"].startswith(asset_prefix):
                 url = asset["browser_download_url"]
         if url is None:
-            quit("Unable to find suitable release")
+            found = ', '.join(found)
+            quit(f"Unable to find suitable release: found {found}")
         else:
             req = request.Request(url=url)
         res = request.urlopen(req)
-        with open(version_path, "wb") as f:
+        with open(cache_path, "wb") as f:
             f.write(res.read())
             f.flush()
 
     def link_release(self, release: dict, sudo: bool = False):
         """Copy lib and header file from a release to the install prefix"""
-        versions = os.path.join(extism_path, "versions")
-        version_path = os.path.join(versions, release["tag_name"])
-        tar = tarfile.open(name=version_path)
+        cache = os.path.join(extism_path, "cache")
+        release_ = os.path.join(extism_path, "release")
+        cache_path = os.path.join(cache, release["tag_name"])
+        release_path = os.path.join(release_, release["tag_name"])
+        tar = tarfile.open(name=cache_path)
+
+        os.makedirs(release_path, exist_ok=True)
 
         lib_dest = os.path.join(self.install_prefix, "lib", self.system.lib())
         header_dest = os.path.join(self.install_prefix, "include", "extism.h")
-        lib_tmp = next(tempfile._get_candidate_names())
-        header_tmp = next(tempfile._get_candidate_names())
 
-        tar.extract(self.system.lib(), path=lib_tmp)
-        cp(lib_tmp, lib_dest, sudo)
+        tar.extractall(path=release_path)
+        cp(os.path.join(release_path, self.system.lib()), lib_dest, sudo)
 
         self.print("Installed", lib_dest)
 
-        tar.extract("extism.h", path=header_tmp)
-
-        cp(header_tmp, header_dest, sudo)
-        try:
-            os.remove(lib_tmp)
-            os.remove(header_tmp)
-        except:
-            pass
+        cp(os.path.join(release_path, "extism.h"), header_dest, sudo)
         self.print("Installed", header_dest)
 
     def link_git(self, mode: str = "release", sudo: bool = False):
@@ -429,6 +428,7 @@ class ExtismBuilder:
         if not self.quiet:
             print(*args)
 
+
 def main():
     args = parser.parse_args()
     extism = ExtismBuilder(prefix=args.prefix, quiet=args.quiet)
@@ -483,6 +483,7 @@ def main():
                 print(
                     f"Prefix\t{extism.install_prefix}\nVersion\t{extism.version}"
                 )
+
 
 if __name__ == "__main__":
     main()
