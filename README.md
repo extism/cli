@@ -22,7 +22,8 @@ The simplest use-case is to download an build the source code then install the l
 the installation prefix of your choice.
 
 ```sh
-$ extism install # install to ~/.local/lib and ~/.local/include
+$ extism install latest # install to ~/.local/lib and ~/.local/include
+$ extism install git # build and install from source
 ```
 
 By default the prefix is `~/.local`, but it can easily be configured:

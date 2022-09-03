@@ -113,7 +113,7 @@ install.add_argument(
 )
 install.add_argument("version",
                      nargs="?",
-                     default="git",
+                     default="latest",
                      help="Version to install")
 install.add_argument(
     "--list-available",
@@ -127,7 +127,7 @@ install.add_argument("--branch", default="main", help="Git branch or tag")
 fetch = subparsers.add_parser("fetch")
 fetch.add_argument("version",
                    nargs="?",
-                   default="git",
+                   default="latest",
                    help="Version to install")
 fetch.add_argument("--branch", default="main", help="Git branch or tag")
 fetch.add_argument("--libc", default="gnu", help="Linux libc")
@@ -139,7 +139,7 @@ uninstall = subparsers.add_parser("uninstall")
 link = subparsers.add_parser("link")
 link.add_argument("version",
                   nargs="?",
-                  default="git",
+                  default="latest",
                   help="Version to install")
 
 link.add_argument("--mode",
@@ -435,8 +435,13 @@ def main():
     if args.command == "install":
         if args.list_available:
             print("git")
+            first = True
             for release in extism.releases(token=args.github_token):
-                print(release["tag_name"])
+                if first:
+                    print(release['tag_name'], "(latest)")
+                    first = False
+                else:
+                    print(release["tag_name"])
         else:
             extism.install(
                 version=args.version,
