@@ -510,7 +510,7 @@ def main():
             import extism
 
         data = open(args.wasm, 'rb').read()
-        extism.set_log_level("-", args.log_level)
+        extism.set_log_file("-", args.log_level)
         plugin = extism.Plugin(data)
         r = plugin.call(args.function, input)
         sys.stdout.buffer.write(r)
