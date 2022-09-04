@@ -159,6 +159,12 @@ info.add_argument("--libs",
                   action="store_true",
                   help="Print link flags")
 
+# Call subcommand
+call = subparsers.add_parser("call")
+call.add_argument("wasm", help='WASM file')
+call.add_argument("--input", default=None, help='Plugin input')
+call.add_argument("function", help='Function name')
+
 
 class ExtismBuilder:
     """Builds and installs extism from source or Github releases"""
@@ -488,6 +494,24 @@ def main():
                 print(
                     f"Prefix\t{extism.install_prefix}\nVersion\t{extism.version}"
                 )
+    elif args.command == "call":
+        if args.input is None and not sys.stdin.isatty():
+            input = sys.stdin.read()
+        else:
+            input = args.input.encode()
+
+        try:
+            # First try installed Python library
+            import extism
+        except:
+            # If that fails use the Python SDK from the source directory
+            sys.path.append(os.path.join(extism.source_path, "python"))
+            import extism
+
+        data = open(args.wasm, 'rb').read()
+        plugin = extism.Plugin(data)
+        r = plugin.call(args.function, input)
+        sys.stdout.buffer.write(r)
 
 
 if __name__ == "__main__":
