@@ -408,7 +408,7 @@ class ExtismBuilder:
         cmd = ["cargo", "build"]
         if mode is None:
             mode = "release"
-            
+
         if mode == "release":
             cmd.append(f"--{mode}")
 
@@ -504,6 +504,9 @@ def main():
             input = sys.stdin.read()
         else:
             input = args.input.encode()
+
+        if not os.path.exists(extism.source_path):
+            extism.fetch(version="git")
 
         try:
             # First try installed Python library
