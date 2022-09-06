@@ -269,7 +269,7 @@ class ExtismBuilder:
         else:
             os.makedirs(os.path.dirname(self.source_path), exist_ok=True)
             subprocess.run([
-                "git", "clone", "--branch", branch, remote_ssh,
+                "git", "clone", "--branch", branch, remote_http,
                 self.source_path
             ])
 
