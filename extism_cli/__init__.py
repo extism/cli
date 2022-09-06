@@ -19,7 +19,7 @@ extism_path = os.getenv("EXTISM_PATH", os.path.join(home_path, ".extism"))
 tmp_path = tempfile.gettempdir()
 
 remote_ssh = "git@github.com:extism/extism"
-remote_http = "https://github.com/extism/extsim"
+remote_http = "https://github.com/extism/extism"
 
 # Utils
 
