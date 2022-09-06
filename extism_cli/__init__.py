@@ -187,6 +187,7 @@ class ExtismBuilder:
     def _init(self):
         if hasattr(self, "source_path"):
             self.runtime_path = os.path.join(self.source_path, "runtime")
+            self.workspace_path = self.source_path
 
     def save_config(self, version: Optional[str] = None):
         """Save config to disk"""
@@ -327,7 +328,7 @@ class ExtismBuilder:
         lib_name = self.system.lib()
         lib_dest = os.path.join(self.install_prefix, "lib", lib_name)
         header_dest = os.path.join(self.install_prefix, "include", "extism.h")
-        lib_src = os.path.join(self.runtime_path, "target", mode, lib_name)
+        lib_src = os.path.join(self.workspace_path, "target", mode, lib_name)
         header_src = os.path.join(self.runtime_path, "extism.h")
         cp(lib_src, lib_dest, sudo)
         self.print(f"Installed {lib_dest}")
@@ -405,6 +406,9 @@ class ExtismBuilder:
     ):
         self.print(f"Building from source in {self.runtime_path}")
         cmd = ["cargo", "build"]
+        if mode is None:
+            mode = "release"
+            
         if mode == "release":
             cmd.append(f"--{mode}")
 
