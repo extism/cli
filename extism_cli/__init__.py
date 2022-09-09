@@ -166,6 +166,7 @@ call.add_argument("--input", default=None, help='Plugin input')
 call.add_argument("function", help='Function name')
 call.add_argument("--log-level", default="error", help="Set log level")
 call.add_argument("--wasi", action='store_true', help="Enables WASI")
+call.add_argument("--set-config", default=None, help="Set config JSON for plug-in")
 
 
 class ExtismBuilder:
@@ -509,6 +510,13 @@ def main():
         if not os.path.exists(extism.source_path):
             extism.fetch(version="git")
 
+        if args.set_config is None:
+            config = ""
+        else:
+            config = args.set_config.encode()
+
+        config = json.loads(config)
+
         try:
             # First try installed Python library
             import extism
@@ -519,7 +527,7 @@ def main():
 
         data = open(args.wasm, 'rb').read()
         extism.set_log_file("-", args.log_level)
-        plugin = extism.Plugin(data, wasi=args.wasi)
+        plugin = extism.Plugin(data, wasi=args.wasi, config=config)
         r = plugin.call(args.function, input)
         sys.stdout.buffer.write(r)
 
