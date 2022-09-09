@@ -165,6 +165,7 @@ call.add_argument("wasm", help='WASM file')
 call.add_argument("--input", default=None, help='Plugin input')
 call.add_argument("function", help='Function name')
 call.add_argument("--log-level", default="error", help="Set log level")
+call.add_argument("--wasi", action='store_true', help="Enables WASI")
 
 
 class ExtismBuilder:
@@ -518,7 +519,7 @@ def main():
 
         data = open(args.wasm, 'rb').read()
         extism.set_log_file("-", args.log_level)
-        plugin = extism.Plugin(data)
+        plugin = extism.Plugin(data, wasi=args.wasi)
         r = plugin.call(args.function, input)
         sys.stdout.buffer.write(r)
 
