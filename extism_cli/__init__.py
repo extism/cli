@@ -166,7 +166,13 @@ call.add_argument("--input", default=None, help='Plugin input')
 call.add_argument("function", help='Function name')
 call.add_argument("--log-level", default="error", help="Set log level")
 call.add_argument("--wasi", action='store_true', help="Enables WASI")
-call.add_argument("--set-config", default=None, help="Set config JSON for plug-in")
+call.add_argument("--set-config",
+                  default=None,
+                  help="Set config JSON for plug-in")
+call.add_argument("--config",
+                  default=[],
+                  nargs='*',
+                  help="Set a single config value")
 
 
 class ExtismBuilder:
@@ -510,12 +516,15 @@ def main():
         if not os.path.exists(extism.source_path):
             extism.fetch(version="git")
 
-        if args.set_config is None:
-            config = ""
-        else:
-            config = args.set_config.encode()
-
-        config = json.loads(config)
+        # Merge args.set_config and args.config
+        config = json.loads(
+            args.set_config) if args.set_config is not None else None
+        if len(args.config) > 0:
+            if config is None:
+                config = {}
+            for x in args.config:
+                x = x.split('=', maxsplit=1)
+                config[x[0]] = x[1]
 
         try:
             # First try installed Python library
