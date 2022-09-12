@@ -517,8 +517,11 @@ def main():
             extism.fetch(version="git")
 
         # Merge args.set_config and args.config
-        config = json.loads(
-            args.set_config) if args.set_config is not None else None
+        if args.set_config is not None:
+            config = json.loads(args.set_config)
+        else: 
+            config = None
+        
         if len(args.config) > 0:
             if config is None:
                 config = {}
