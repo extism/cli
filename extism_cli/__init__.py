@@ -59,11 +59,14 @@ class System:
 
     def asset_prefix(self, libc: str = "gnu"):
         """Get the prefix of the uploaded release asset for the current system"""
+        machine = self.uname.machine
+        if machine == "arm64":
+            machine = "aarch64"
 
         if self.uname.sysname == "Darwin":
-            return f"libextism-{self.uname.machine}-apple-darwin"
+            return f"libextism-{machine}-apple-darwin"
         elif self.uname.sysname == "Linux":
-            return f"libextism-{self.uname.machine}-unknown-linux-{libc}"
+            return f"libextism-{machine}-unknown-linux-{libc}"
         quit("Invalid OS, try installing from source")
 
 
