@@ -538,7 +538,7 @@ def main():
             import extism
 
         data = open(args.wasm, 'rb').read()
-        extism.set_log_file("-", args.log_level)
+        extism.set_log_file("stderr", args.log_level)
         plugin = extism.Plugin(data, wasi=args.wasi, config=config)
         r = plugin.call(args.function, input, parse=None)
         sys.stdout.buffer.write(r)
