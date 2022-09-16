@@ -35,7 +35,7 @@ jobs:
           pip3 install .
           extism -h
         
-          extism install git
+          extism install latest
       
       - name: Test CLI
         run: |
@@ -44,6 +44,14 @@ jobs:
       - name: Test CLI with /usr/local prefix install
         run: |
           extism uninstall
-          extism --prefix /usr/local install
+          extism --prefix /usr/local install latest
+          
+          echo "this is a test" | extism call test/code.wasm count_vowels
+        
+    
+      - name: Test CLI with git install
+        run: |
+          extism uninstall
+          extism install git
           
           echo "this is a test" | extism call test/code.wasm count_vowels
