@@ -23,9 +23,12 @@ remote_http = "https://github.com/extism/extism"
 
 # Utils
 
+def has_sudo():
+    return shutil.which("sudo") is not None
+
 
 def cp(src: str, dest: str, sudo: bool = False):
-    if dest.startswith("/usr/"):
+    if dest.startswith("/usr/") and has_sudo():
         sudo = True
     """Copy a file, optionally using sudo"""
     if sudo:
@@ -374,7 +377,7 @@ class ExtismBuilder:
         lib = os.path.join(self.install_prefix, "lib", self.system.lib())
         header = os.path.join(self.install_prefix, "include", "extism.h")
         try:
-            if sudo:
+            if sudo and has_sudo():
                 subprocess.run(["sudo", "rm", "-f", lib])
             else:
                 os.remove(lib)
@@ -383,7 +386,7 @@ class ExtismBuilder:
             self.print(f"Warning: file does not exist {lib}")
 
         try:
-            if sudo:
+            if sudo and has_sudo():
                 subprocess.run(["sudo", "rm", "-f", header])
             else:
                 os.remove(header)
