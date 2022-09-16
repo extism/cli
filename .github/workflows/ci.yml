@@ -40,3 +40,10 @@ jobs:
       - name: Test CLI
         run: |
           echo "this is a test" | extism call test/code.wasm count_vowels
+
+      - name: Test CLI with /usr/local prefix install
+        run: |
+          extism uninstall
+          extism --prefix /usr/local install
+          
+          echo "this is a test" | extism call test/code.wasm count_vowels
