@@ -3,8 +3,8 @@ on: [push, pull_request]
 name: CI
 
 jobs:
-  install_and_test:
-    name: Install & Test
+  install_latest_and_test:
+    name: Install & Test (latest build))
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -48,10 +48,41 @@ jobs:
           
           echo "this is a test" | extism call test/code.wasm count_vowels
         
-    
-      - name: Test CLI with git install
+
+  install_git_and_test:
+    name: Install & Test (from source)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        rust:
+          - stable
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Setup Python env
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          check-latest: true
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install CLI and extism lib
         run: |
-          extism uninstall
+          pip3 install cffi
+          pip3 install .
+          extism -h
+        
           extism install git
-          
+      
+      - name: Test CLI
+        run: |
           echo "this is a test" | extism call test/code.wasm count_vowels
