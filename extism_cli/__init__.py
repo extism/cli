@@ -543,11 +543,12 @@ def main():
             sys.path.append(os.path.join(extism.source_path, "python"))
             import extism
 
-        data = open(args.wasm, 'rb').read()
-        extism.set_log_file("stderr", args.log_level)
-        plugin = extism.Plugin(data, wasi=args.wasi, config=config)
-        r = plugin.call(args.function, input, parse=None)
-        sys.stdout.buffer.write(r)
+        with extism.Context() as ctx:
+            data = open(args.wasm, 'rb').read()
+            extism.set_log_file("stderr", args.log_level)
+            plugin = ctx.plugin(data, wasi=args.wasi, config=config)
+            r = plugin.call(args.function, input, parse=None)
+            sys.stdout.buffer.write(r)
 
 
 if __name__ == "__main__":
