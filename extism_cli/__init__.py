@@ -168,8 +168,8 @@ info.add_argument("--libs",
 # Call subcommand
 call = subparsers.add_parser("call")
 call.add_argument("wasm", help='WASM file')
-call.add_argument("--input", default=None, help='Plugin input')
 call.add_argument("function", help='Function name')
+call.add_argument("input", nargs='?', default=None, help='Plugin input')
 call.add_argument("--log-level", default="error", help="Set log level")
 call.add_argument("--wasi", action='store_true', help="Enables WASI")
 call.add_argument("--set-config",
@@ -517,6 +517,8 @@ def main():
         if args.input is None and not sys.stdin.isatty():
             input = sys.stdin.read()
         else:
+            if args.input is None:
+                args.input = ''
             input = args.input.encode()
 
         if not os.path.exists(extism.source_path):
