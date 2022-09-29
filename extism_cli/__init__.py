@@ -517,7 +517,10 @@ def main():
         if args.input is None and not sys.stdin.isatty():
             input = sys.stdin.read()
         else:
-            input = args.input.encode()
+            if args.input is None:
+                input = b''
+            else:
+                input = args.input.encode()
 
         if not os.path.exists(extism.source_path):
             extism.fetch(version="git")
