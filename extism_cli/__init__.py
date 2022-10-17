@@ -9,7 +9,6 @@ import json
 import tarfile
 from urllib import request
 
-
 from typing import Optional, List
 
 # Paths
