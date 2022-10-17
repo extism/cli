@@ -559,7 +559,7 @@ def main():
                 config[x[0]] = x[1]
 
         libextism = extism.import_extism()
-        with extism.Context() as ctx:
+        with libextism.Context() as ctx:
             data = open(args.wasm, 'rb').read()
             libextism.set_log_file("stderr", args.log_level)
             plugin = ctx.plugin(data, wasi=args.wasi, config=config)
