@@ -467,8 +467,7 @@ class ExtismBuilder:
                 import extism
             return extism
         except ModuleNotFoundError:
-            print("Could not find extism on this machine")
-            sys.exit(1)
+            quit("Could not find extism on this machine")
 
 
 def main():
