@@ -9,6 +9,7 @@ import json
 import tarfile
 from urllib import request
 
+
 from typing import Optional, List
 
 # Paths
@@ -108,6 +109,9 @@ build.add_argument(
     action="store_true",
     help="Disable default features",
 )
+
+# Version command
+install = subparsers.add_parser("version")
 
 # Install command
 install = subparsers.add_parser("install")
@@ -453,11 +457,28 @@ class ExtismBuilder:
         if not self.quiet:
             print(*args)
 
+    def import_extism(self):
+        try:
+            try:
+                # First try installed Python library
+                import extism
+            except:
+                # If that fails use the Python SDK from the source directory
+                sys.path.append(os.path.join(self.source_path, "python"))
+                import extism
+            return extism
+        except ModuleNotFoundError:
+            print("Could not find extism on this machine")
+            sys.exit(1)
+
 
 def main():
     args = parser.parse_args()
     extism = ExtismBuilder(prefix=args.prefix, quiet=args.quiet)
-    if args.command == "install":
+    if args.command == "version":
+        libextism = extism.import_extism()
+        print(libextism.extism_version())
+    elif args.command == "install":
         if args.list_available:
             print("git")
             first = True
@@ -538,17 +559,10 @@ def main():
                 x = x.split('=', maxsplit=1)
                 config[x[0]] = x[1]
 
-        try:
-            # First try installed Python library
-            import extism
-        except:
-            # If that fails use the Python SDK from the source directory
-            sys.path.append(os.path.join(extism.source_path, "python"))
-            import extism
-
+        libextism = extism.import_extism()
         with extism.Context() as ctx:
             data = open(args.wasm, 'rb').read()
-            extism.set_log_file("stderr", args.log_level)
+            libextism.set_log_file("stderr", args.log_level)
             plugin = ctx.plugin(data, wasi=args.wasi, config=config)
             r = plugin.call(args.function, input, parse=None)
             sys.stdout.buffer.write(r)
