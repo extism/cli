@@ -23,6 +23,7 @@ remote_http = "https://github.com/extism/extism"
 
 # Utils
 
+
 def has_sudo():
     return shutil.which("sudo") is not None
 
@@ -201,6 +202,7 @@ class ExtismBuilder:
     def _init(self):
         if hasattr(self, "source_path"):
             self.runtime_path = os.path.join(self.source_path, "runtime")
+            self.libcrate_path = os.path.join(self.source_path, "libextism")
             self.workspace_path = self.source_path
 
     def save_config(self, version: Optional[str] = None):
@@ -418,7 +420,7 @@ class ExtismBuilder:
         features: List[str] = ["default"],
         no_default_features: bool = False,
     ):
-        self.print(f"Building from source in {self.runtime_path}")
+        self.print(f"Building from source in {self.libcrate_path}")
         cmd = ["cargo", "build"]
         if mode is None:
             mode = "release"
@@ -431,7 +433,7 @@ class ExtismBuilder:
             if features == ["default"]:
                 features = []
         cmd.extend(["--features", ",".join(features)])
-        subprocess.run(cmd, cwd=self.runtime_path)
+        subprocess.run(cmd, cwd=self.libcrate_path)
 
     def install(
         self,
@@ -528,9 +530,9 @@ def main():
         # Merge args.set_config and args.config
         if args.set_config is not None:
             config = json.loads(args.set_config)
-        else: 
+        else:
             config = None
-        
+
         if len(args.config) > 0:
             if config is None:
                 config = {}
