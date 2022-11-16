@@ -468,8 +468,11 @@ class ExtismBuilder:
                 sys.path.append(os.path.join(self.source_path, "python"))
                 import extism
             return extism
-        except ModuleNotFoundError:
-            quit("Could not find extism on this machine")
+        except ModuleNotFoundError as e:
+            if e.name == "extism":
+                quit("Could not find extism on this machine")
+            else:
+                raise e
 
 
 def main():
