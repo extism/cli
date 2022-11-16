@@ -11,6 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
+extism = "*"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
