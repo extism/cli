@@ -111,7 +111,7 @@ build.add_argument(
 )
 
 # Version command
-install = subparsers.add_parser("version")
+version = subparsers.add_parser("version")
 
 # Install command
 install = subparsers.add_parser("install")
