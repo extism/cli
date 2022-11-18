@@ -546,9 +546,6 @@ def main():
             else:
                 input = args.input.encode()
 
-        if not os.path.exists(extism.source_path):
-            extism.fetch(version="git")
-
         # Merge args.set_config and args.config
         if args.set_config is not None:
             config = json.loads(args.set_config)
