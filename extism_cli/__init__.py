@@ -14,7 +14,6 @@ from typing import Optional, List
 # Paths
 
 home_path = os.path.expanduser("~")
-home_local = os.path.join(home_path, ".local")
 extism_path = os.getenv("EXTISM_PATH", os.path.join(home_path, ".extism"))
 tmp_path = tempfile.gettempdir()
 
@@ -192,7 +191,7 @@ class ExtismBuilder:
         self.load_config()
 
         if prefix is not None or not hasattr(self, "install_prefix"):
-            self.install_prefix = prefix or home_local
+            self.install_prefix = prefix or "/usr/local"
 
         if source is not None or not hasattr(self, "source_path"):
             self.source_path = source or os.path.join(extism_path, "extism")
