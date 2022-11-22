@@ -22,12 +22,12 @@ The simplest use-case is to download an build the source code then install the l
 the installation prefix of your choice.
 
 ```sh
-$ extism install latest # install to ~/.local/lib and ~/.local/include
+$ extism install latest # install to /usr/lib and /usr/include
 $ extism install git # build and install from source
 ```
 
-By default the prefix is `~/.local`, but it can easily be configured:
+By default the prefix is `/usr/local`, but it can easily be configured:
 
 ```sh
-$ extism --sudo --prefix /usr/local install
+$ extism --prefix ~/.local install
 ```
