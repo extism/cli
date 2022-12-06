@@ -182,7 +182,7 @@ call.add_argument("--config",
                   default=[],
                   nargs='*',
                   help="Set a single config value")
-call.add_argument("--path",
+call.add_argument("--allow-path",
                   default=[],
                   nargs='*',
                   help="Provide access to a directory")
@@ -569,10 +569,10 @@ def main():
                     "path": args.wasm
                 }],
             }
-            if len(args.path) > 0:
+            if len(args.allow_path) > 0:
                 args.wasi = True
                 paths = {}
-                for p in args.path:
+                for p in args.allow_path:
                     if '=' in p:
                         s = p.split('=', maxsplit=1)
                         paths[s[0]] = s[1]
