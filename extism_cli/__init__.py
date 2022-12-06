@@ -182,6 +182,10 @@ call.add_argument("--config",
                   default=[],
                   nargs='*',
                   help="Set a single config value")
+call.add_argument("--path",
+                  default=[],
+                  nargs='*',
+                  help="Provide access to a directory")
 
 
 class ExtismBuilder:
@@ -560,9 +564,23 @@ def main():
 
         libextism = extism.import_extism()
         with libextism.Context() as ctx:
-            data = open(args.wasm, 'rb').read()
+            manifest = {
+                "wasm": [{
+                    "path": args.wasm
+                }],
+            }
+            if len(args.path) > 0:
+                paths = {}
+                for p in args.path:
+                    if '=' in p:
+                        s = p.split('=', maxsplit=1)
+                        paths[s[0]] = s[1]
+                    else:
+                        paths[p] = p
+                manifest["allowed_paths"] = paths
+
             libextism.set_log_file("stderr", args.log_level)
-            plugin = ctx.plugin(data, wasi=args.wasi, config=config)
+            plugin = ctx.plugin(manifest, wasi=args.wasi, config=config)
             r = plugin.call(args.function, input, parse=None)
             sys.stdout.buffer.write(r)
 
