@@ -186,6 +186,10 @@ call.add_argument("--allow-path",
                   default=[],
                   nargs='*',
                   help="Provide access to a directory")
+call.add_argument("--manifest",
+                  default=False,
+                  action='store_true',
+                  help="Load manifest instead of WASM module")
 
 
 class ExtismBuilder:
@@ -564,11 +568,24 @@ def main():
 
         libextism = extism.import_extism()
         with libextism.Context() as ctx:
-            manifest = {
-                "wasm": [{
-                    "path": args.wasm
-                }],
-            }
+            if args.manifest:
+                with open(args.wasm) as f:
+                    s = f.read().lstrip()
+                    is_json = s[0] == '{'
+                    if is_json:
+                        manifest = json.loads(s)
+                    else:
+                        try:
+                            import toml
+                        except:
+                            import tomllib as toml
+                        manifest = toml.loads(s)
+            else:
+                manifest = {
+                    "wasm": [{
+                        "path": args.wasm
+                    }],
+                }
             if len(args.allow_path) > 0:
                 args.wasi = True
                 paths = {}
