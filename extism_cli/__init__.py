@@ -182,6 +182,14 @@ call.add_argument("--config",
                   default=[],
                   nargs='*',
                   help="Set a single config value")
+call.add_argument("--allow-path",
+                  default=[],
+                  nargs='*',
+                  help="Provide a plugin access to a host directory, e.g. --allow-path ./host:/plugin")
+call.add_argument("--manifest",
+                  default=False,
+                  action='store_true',
+                  help="Load manifest instead of WASM module")
 
 
 class ExtismBuilder:
@@ -560,9 +568,37 @@ def main():
 
         libextism = extism.import_extism()
         with libextism.Context() as ctx:
-            data = open(args.wasm, 'rb').read()
+            if args.manifest:
+                with open(args.wasm) as f:
+                    s = f.read().lstrip()
+                    is_json = s[0] == '{'
+                    if is_json:
+                        manifest = json.loads(s)
+                    else:
+                        try:
+                            import toml
+                        except:
+                            import tomllib as toml
+                        manifest = toml.loads(s)
+            else:
+                manifest = {
+                    "wasm": [{
+                        "path": args.wasm
+                    }],
+                }
+            if len(args.allow_path) > 0:
+                args.wasi = True
+                paths = {}
+                for p in args.allow_path:
+                    if ':' in p:
+                        s = p.split(':', maxsplit=1)
+                        paths[s[0]] = s[1]
+                    else:
+                        paths[p] = p
+                manifest["allowed_paths"] = paths
+
             libextism.set_log_file("stderr", args.log_level)
-            plugin = ctx.plugin(data, wasi=args.wasi, config=config)
+            plugin = ctx.plugin(manifest, wasi=args.wasi, config=config)
             r = plugin.call(args.function, input, parse=None)
             sys.stdout.buffer.write(r)
 
