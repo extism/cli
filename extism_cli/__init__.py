@@ -185,7 +185,7 @@ call.add_argument("--config",
 call.add_argument("--allow-path",
                   default=[],
                   nargs='*',
-                  help="Provide access to a directory")
+                  help="Provide a plugin access to a host directory, e.g. --allow-path ./host:/plugin")
 call.add_argument("--manifest",
                   default=False,
                   action='store_true',
@@ -590,8 +590,8 @@ def main():
                 args.wasi = True
                 paths = {}
                 for p in args.allow_path:
-                    if '=' in p:
-                        s = p.split('=', maxsplit=1)
+                    if ':' in p:
+                        s = p.split(':', maxsplit=1)
                         paths[s[0]] = s[1]
                     else:
                         paths[p] = p
