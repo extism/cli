@@ -570,6 +570,7 @@ def main():
                 }],
             }
             if len(args.path) > 0:
+                args.wasi = True
                 paths = {}
                 for p in args.path:
                     if '=' in p:
