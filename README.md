@@ -22,7 +22,7 @@ The simplest use-case is to download an build the source code then install the l
 the installation prefix of your choice.
 
 ```sh
-$ extism install latest # install to /usr/lib and /usr/include
+$ extism install latest # install to /usr/local/lib and /usr/local/include
 $ extism install git # build and install from source
 ```
 
