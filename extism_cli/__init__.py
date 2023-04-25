@@ -186,6 +186,10 @@ call.add_argument("--allow-path",
                   default=[],
                   nargs='*',
                   help="Provide a plugin access to a host directory, e.g. --allow-path ./host:/plugin")
+call.add_argument("--allow-host",
+                  default=[],
+                  nargs='*',
+                  help="Allow HTTP requests to the specified host")
 call.add_argument("--manifest",
                   default=False,
                   action='store_true',
@@ -586,9 +590,10 @@ def main():
                         "path": args.wasm
                     }],
                 }
+
             if len(args.allow_path) > 0:
                 args.wasi = True
-                paths = {}
+                paths = manifest.get("allowed_paths", {})
                 for p in args.allow_path:
                     if ':' in p:
                         s = p.split(':', maxsplit=1)
@@ -596,6 +601,12 @@ def main():
                     else:
                         paths[p] = p
                 manifest["allowed_paths"] = paths
+               
+            if len(args.allow_host) > 0:
+                args.wasi = True
+                if "allowed_hosts" not in manifest:
+                    manifest["allowed_hosts"] = []
+                manifest["allowed_hosts"].extend(args.allow_host)
 
             libextism.set_log_file("stderr", args.log_level)
             plugin = ctx.plugin(manifest, wasi=args.wasi, config=config)
