@@ -614,6 +614,8 @@ def main():
             for i in range(args.loop):
                 r = plugin.call(args.function, input, parse=None)
                 sys.stdout.buffer.write(r)
+                if args.loop > 1:
+                    print()
 
 
 if __name__ == "__main__":
