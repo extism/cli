@@ -194,6 +194,7 @@ call.add_argument("--manifest",
                   default=False,
                   action='store_true',
                   help="Load manifest instead of WASM module")
+call.add_argument("--loop", default=1, type=int, help="The number of times to call the specified function")
 
 
 class ExtismBuilder:
@@ -610,8 +611,11 @@ def main():
 
             libextism.set_log_file("stderr", args.log_level)
             plugin = ctx.plugin(manifest, wasi=args.wasi, config=config)
-            r = plugin.call(args.function, input, parse=None)
-            sys.stdout.buffer.write(r)
+            for i in range(args.loop):
+                r = plugin.call(args.function, input, parse=None)
+                sys.stdout.buffer.write(r)
+                if args.loop > 1:
+                    print()
 
 
 if __name__ == "__main__":
