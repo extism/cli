@@ -589,11 +589,9 @@ def main():
                 from urllib.parse import urlparse
                 pieces = urlparse(args.wasm)
                 if pieces.scheme.lower() in ('http', 'https'):
-                    import urllib.request
-                    f = urllib.request.urlopen(args.wasm)
                     manifest = {
                         "wasm": [{
-                            "data": f.read()
+                            "url": args.wasm
                         }],
                     }
                 else:
