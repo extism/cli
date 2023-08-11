@@ -170,7 +170,7 @@ info.add_argument("--libs",
 
 # Call subcommand
 call = subparsers.add_parser("call")
-call.add_argument("wasm", help='WASM file')
+call.add_argument("wasm", help='WASM file or url')
 call.add_argument("--input", default=None, help='Plugin input')
 call.add_argument("function", help='Function name')
 call.add_argument("--log-level", default="error", help="Set log level")
@@ -586,11 +586,21 @@ def main():
                             import tomllib as toml
                         manifest = toml.loads(s)
             else:
-                manifest = {
-                    "wasm": [{
-                        "path": args.wasm
-                    }],
-                }
+                from urllib.parse import urlparse
+                pieces = urlparse(args.wasm)
+                if pieces.scheme.lower() in ('http', 'https'):
+                    manifest = {
+                        "wasm": [{
+                            "url": args.wasm
+                        }],
+                    }
+                else:
+                    manifest = {
+                        "wasm": [{
+                            "path": args.wasm
+                        }],
+                    }
+
 
             if len(args.allow_path) > 0:
                 args.wasi = True
