@@ -76,32 +76,26 @@ class System:
 # Parse arguments
 
 parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers(title="command",
-                                   dest="command",
-                                   required=True)
-parser.add_argument("--quiet",
-                    default=False,
-                    action="store_true",
-                    help="Limit output to errors")
+subparsers = parser.add_subparsers(title="command", dest="command", required=True)
+parser.add_argument(
+    "--quiet", default=False, action="store_true", help="Limit output to errors"
+)
 parser.add_argument("--prefix", default=None, help="Installation prefix")
-parser.add_argument("--github-token",
-                    default=os.getenv("GITHUB_TOKEN"),
-                    help="Github token")
-parser.add_argument("--sudo",
-                    default=False,
-                    action="store_true",
-                    help="Use sudo to install files")
+parser.add_argument(
+    "--github-token", default=os.getenv("GITHUB_TOKEN"), help="Github token"
+)
+parser.add_argument(
+    "--sudo", default=False, action="store_true", help="Use sudo to install files"
+)
 
 # Build arguments
 build = subparsers.add_parser("build")
-build.add_argument("--features",
-                   default=["default"],
-                   nargs="*",
-                   help="Enable/disable features")
-build.add_argument("--mode",
-                   default="release",
-                   choices=["debug", "release"],
-                   help="Cargo build mode")
+build.add_argument(
+    "--features", default=["default"], nargs="*", help="Enable/disable features"
+)
+build.add_argument(
+    "--mode", default="release", choices=["debug", "release"], help="Cargo build mode"
+)
 build.add_argument(
     "--no-default-features",
     default=False,
@@ -120,10 +114,7 @@ install.add_argument(
     action="store_true",
     help="Update if an existing installation is present",
 )
-install.add_argument("version",
-                     nargs="?",
-                     default="latest",
-                     help="Version to install")
+install.add_argument("version", nargs="?", default="latest", help="Version to install")
 install.add_argument(
     "--list-available",
     default=False,
@@ -134,10 +125,7 @@ install.add_argument("--branch", default="main", help="Git branch or tag")
 
 # Fetch command
 fetch = subparsers.add_parser("fetch")
-fetch.add_argument("version",
-                   nargs="?",
-                   default="latest",
-                   help="Version to install")
+fetch.add_argument("version", nargs="?", default="latest", help="Version to install")
 fetch.add_argument("--branch", default="main", help="Git branch or tag")
 fetch.add_argument("--libc", default="gnu", help="Linux libc")
 
@@ -146,55 +134,53 @@ uninstall = subparsers.add_parser("uninstall")
 
 # Link command
 link = subparsers.add_parser("link")
-link.add_argument("version",
-                  nargs="?",
-                  default="latest",
-                  help="Version to install")
+link.add_argument("version", nargs="?", default="latest", help="Version to install")
 
-link.add_argument("--mode",
-                  default="release",
-                  choices=["debug", "release"],
-                  help="Cargo build mode")
+link.add_argument(
+    "--mode", default="release", choices=["debug", "release"], help="Cargo build mode"
+)
 
 # Info command
 info = subparsers.add_parser("info")
 
-info.add_argument("--cflags",
-                  default=False,
-                  action="store_true",
-                  help="Print include path")
-info.add_argument("--libs",
-                  default=False,
-                  action="store_true",
-                  help="Print link flags")
+info.add_argument(
+    "--cflags", default=False, action="store_true", help="Print include path"
+)
+info.add_argument("--libs", default=False, action="store_true", help="Print link flags")
 
 # Call subcommand
 call = subparsers.add_parser("call")
-call.add_argument("wasm", help='WASM file or url')
-call.add_argument("--input", default=None, help='Plugin input')
-call.add_argument("function", help='Function name')
+call.add_argument("wasm", help="WASM file or url")
+call.add_argument("--input", default=None, help="Plugin input")
+call.add_argument("function", help="Function name")
 call.add_argument("--log-level", default="error", help="Set log level")
-call.add_argument("--wasi", action='store_true', help="Enables WASI")
-call.add_argument("--set-config",
-                  default=None,
-                  help="Set config JSON for plug-in")
-call.add_argument("--config",
-                  default=[],
-                  nargs='*',
-                  help="Set a single config value")
-call.add_argument("--allow-path",
-                  default=[],
-                  nargs='*',
-                  help="Provide a plugin access to a host directory, e.g. --allow-path ./host:/plugin")
-call.add_argument("--allow-host",
-                  default=[],
-                  nargs='*',
-                  help="Allow HTTP requests to the specified host")
-call.add_argument("--manifest",
-                  default=False,
-                  action='store_true',
-                  help="Load manifest instead of WASM module")
-call.add_argument("--loop", default=1, type=int, help="The number of times to call the specified function")
+call.add_argument("--wasi", action="store_true", help="Enables WASI")
+call.add_argument("--set-config", default=None, help="Set config JSON for plug-in")
+call.add_argument("--config", default=[], nargs="*", help="Set a single config value")
+call.add_argument(
+    "--allow-path",
+    default=[],
+    nargs="*",
+    help="Provide a plugin access to a host directory, e.g. --allow-path ./host:/plugin",
+)
+call.add_argument(
+    "--allow-host",
+    default=[],
+    nargs="*",
+    help="Allow HTTP requests to the specified host",
+)
+call.add_argument(
+    "--manifest",
+    default=False,
+    action="store_true",
+    help="Load manifest instead of WASM module",
+)
+call.add_argument(
+    "--loop",
+    default=1,
+    type=int,
+    help="The number of times to call the specified function",
+)
 
 
 class ExtismBuilder:
@@ -260,10 +246,12 @@ class ExtismBuilder:
             dest.append(
                 dict(
                     filter(
-                        lambda item: item[0] in
-                        ["tarball_url", "assets", "tag_name", "name"],
+                        lambda item: item[0]
+                        in ["tarball_url", "assets", "tag_name", "name"],
                         release.items(),
-                    )))
+                    )
+                )
+            )
         return dest
 
     def find_release(self, name: str, token: Optional[str] = None):
@@ -295,14 +283,12 @@ class ExtismBuilder:
 
             subprocess.run(["git", "checkout", branch], cwd=self.source_path)
 
-            subprocess.run(["git", "pull", "origin", branch],
-                           cwd=self.source_path)
+            subprocess.run(["git", "pull", "origin", branch], cwd=self.source_path)
         else:
             os.makedirs(os.path.dirname(self.source_path), exist_ok=True)
-            subprocess.run([
-                "git", "clone", "--branch", branch, remote_http,
-                self.source_path
-            ])
+            subprocess.run(
+                ["git", "clone", "--branch", branch, remote_http, self.source_path]
+            )
 
     def download_release(self, release: dict, libc: str = "gnu"):
         """
@@ -319,12 +305,12 @@ class ExtismBuilder:
         url = None
         found = []
         for asset in release["assets"]:
-            if '.txt' not in asset['name']:
+            if ".txt" not in asset["name"]:
                 found.append(asset["name"])
             if asset["name"].startswith(asset_prefix):
                 url = asset["browser_download_url"]
         if url is None:
-            found = ', '.join(found)
+            found = ", ".join(found)
             quit(f"Unable to find suitable release: found {found}")
         else:
             req = request.Request(url=url)
@@ -367,20 +353,17 @@ class ExtismBuilder:
         cp(header_src, header_dest, sudo)
         self.print(f"Installed {header_dest}")
 
-    def link(self,
-             release: Optional[dict] = None,
-             sudo: bool = False,
-             mode: str = "release"):
+    def link(
+        self, release: Optional[dict] = None, sudo: bool = False, mode: str = "release"
+    ):
         if release is None:
             version = "git"
         else:
             version = release["tag_name"]
         self.print(f"Installing to {self.install_prefix} (version {version})")
         try:
-            os.makedirs(os.path.join(self.install_prefix, "lib"),
-                        exist_ok=True)
-            os.makedirs(os.path.join(self.install_prefix, "include"),
-                        exist_ok=True)
+            os.makedirs(os.path.join(self.install_prefix, "lib"), exist_ok=True)
+            os.makedirs(os.path.join(self.install_prefix, "include"), exist_ok=True)
         except:
             pass
         if release is None:
@@ -458,10 +441,9 @@ class ExtismBuilder:
         token: Optional[str] = None,
         no_update: bool = False,
     ):
-        release = self.fetch(version=version,
-                             branch=branch,
-                             token=token,
-                             no_update=no_update)
+        release = self.fetch(
+            version=version, branch=branch, token=token, no_update=no_update
+        )
         if version == "git":
             self.build()
         self.link(release=release, sudo=sudo)
@@ -499,7 +481,7 @@ def main():
             first = True
             for release in extism.releases(token=args.github_token):
                 if first:
-                    print(release['tag_name'], "(latest)")
+                    print(release["tag_name"], "(latest)")
                     first = False
                 else:
                     print(release["tag_name"])
@@ -546,15 +528,13 @@ def main():
 
         if not args.cflags and not args.libs:
             if hasattr(extism, "version"):
-                print(
-                    f"Prefix\t{extism.install_prefix}\nVersion\t{extism.version}"
-                )
+                print(f"Prefix\t{extism.install_prefix}\nVersion\t{extism.version}")
     elif args.command == "call":
         if args.input is None and not sys.stdin.isatty():
             input = sys.stdin.read()
         else:
             if args.input is None:
-                input = b''
+                input = b""
             else:
                 input = args.input.encode()
 
@@ -568,64 +548,59 @@ def main():
             if config is None:
                 config = {}
             for x in args.config:
-                x = x.split('=', maxsplit=1)
+                x = x.split("=", maxsplit=1)
                 config[x[0]] = x[1]
 
         libextism = extism.import_extism()
-        with libextism.Context() as ctx:
-            if args.manifest:
-                with open(args.wasm) as f:
-                    s = f.read().lstrip()
-                    is_json = s[0] == '{'
-                    if is_json:
-                        manifest = json.loads(s)
-                    else:
-                        try:
-                            import toml
-                        except:
-                            import tomllib as toml
-                        manifest = toml.loads(s)
-            else:
-                from urllib.parse import urlparse
-                pieces = urlparse(args.wasm)
-                if pieces.scheme.lower() in ('http', 'https'):
-                    manifest = {
-                        "wasm": [{
-                            "url": args.wasm
-                        }],
-                    }
+        if args.manifest:
+            with open(args.wasm) as f:
+                s = f.read().lstrip()
+                is_json = s[0] == "{"
+                if is_json:
+                    manifest = json.loads(s)
                 else:
-                    manifest = {
-                        "wasm": [{
-                            "path": args.wasm
-                        }],
-                    }
+                    try:
+                        import toml
+                    except:
+                        import tomllib as toml
+                    manifest = toml.loads(s)
+        else:
+            from urllib.parse import urlparse
 
+            pieces = urlparse(args.wasm)
+            if pieces.scheme.lower() in ("http", "https"):
+                manifest = {
+                    "wasm": [{"url": args.wasm}],
+                }
+            else:
+                manifest = {
+                    "wasm": [{"path": args.wasm}],
+                }
 
-            if len(args.allow_path) > 0:
-                args.wasi = True
-                paths = manifest.get("allowed_paths", {})
-                for p in args.allow_path:
-                    if ':' in p:
-                        s = p.split(':', maxsplit=1)
-                        paths[s[0]] = s[1]
-                    else:
-                        paths[p] = p
-                manifest["allowed_paths"] = paths
-               
-            if len(args.allow_host) > 0:
-                args.wasi = True
-                if "allowed_hosts" not in manifest:
-                    manifest["allowed_hosts"] = []
-                manifest["allowed_hosts"].extend(args.allow_host)
+        if len(args.allow_path) > 0:
+            args.wasi = True
+            paths = manifest.get("allowed_paths", {})
+            for p in args.allow_path:
+                if ":" in p:
+                    s = p.split(":", maxsplit=1)
+                    paths[s[0]] = s[1]
+                else:
+                    paths[p] = p
+            manifest["allowed_paths"] = paths
 
-            libextism.set_log_file("stderr", args.log_level)
-            plugin = ctx.plugin(manifest, wasi=args.wasi, config=config)
-            for i in range(args.loop):
-                r = plugin.call(args.function, input, parse=None)
-                sys.stdout.buffer.write(r)
-                if args.loop > 1:
-                    print()
+        if len(args.allow_host) > 0:
+            args.wasi = True
+            if "allowed_hosts" not in manifest:
+                manifest["allowed_hosts"] = []
+            manifest["allowed_hosts"].extend(args.allow_host)
+
+        libextism.set_log_file("stderr", args.log_level)
+        plugin = libextism.Plugin(manifest, wasi=args.wasi, config=config)
+        for i in range(args.loop):
+            r = plugin.call(args.function, input, parse=None)
+            sys.stdout.buffer.write(r)
+            if args.loop > 1:
+                print()
 
 
 if __name__ == "__main__":
