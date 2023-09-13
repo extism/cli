@@ -1,8 +1,20 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"context"
 	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sort"
+	"strings"
 
+	"github.com/google/go-github/github"
 	"github.com/spf13/cobra"
 )
 
@@ -36,12 +48,145 @@ func (a *libUninstallArgs) GetArgs() []string {
 	return a.args
 }
 
-func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
-	return errors.New("TODO")
+func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err error) {
+	client := github.NewClient(http.DefaultClient)
+	releases, _, err = client.Repositories.ListReleases(ctx, "extism", "extism", nil)
+	if err != nil {
+		return releases, err
+	}
+	sort.Slice(releases, func(i, j int) bool {
+		return releases[i].CreatedAt.Before(releases[j].CreatedAt.Time)
+	})
+	return releases, nil
 }
 
-func runLibUninstall(cmd *cobra.Command, installArgs *libUninstallArgs) error {
-	return errors.New("TODO")
+func findRelease(ctx context.Context, name string) (release *github.RepositoryRelease, err error) {
+	releases, err := getReleases(ctx)
+	if err != nil {
+		return release, err
+	}
+
+	for i, rel := range releases {
+		if i == len(releases)-1 && name == "latest" {
+			return rel, nil
+		} else if rel.TagName != nil && *rel.TagName == name {
+			return rel, nil
+		}
+	}
+
+	return release, errors.New("Unable to find release: " + name)
+}
+
+func assetPrefix() string {
+
+	s := "libextism-"
+	if runtime.GOARCH == "amd64" {
+		s += "x86_64"
+	} else {
+		s += runtime.GOARCH
+	}
+	if runtime.GOOS == "linux" {
+		return s + "-unknown-linux-gnu"
+	} else if runtime.GOOS == "windows" {
+		return s + "-pc-windows-mvsc"
+	} else if runtime.GOOS == "macos" {
+		return s + "-apple-darwin"
+	}
+
+	return s
+}
+
+func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
+	rel, err := findRelease(cmd.Context(), installArgs.version)
+	if err != nil {
+		return err
+	}
+
+	for _, asset := range rel.Assets {
+		if strings.HasPrefix(asset.GetName(), assetPrefix()) && strings.HasSuffix(asset.GetName(), ".tar.gz") {
+			url := asset.GetBrowserDownloadURL()
+			fmt.Println("Fetching", url)
+			res, err := http.Get(url)
+			if err != nil {
+				return err
+			}
+			defer res.Body.Close()
+			r, err := gzip.NewReader(res.Body)
+			if err != nil {
+				return err
+			}
+			tarReader := tar.NewReader(r)
+
+			for {
+				item, err := tarReader.Next()
+				if err == io.EOF {
+					break
+				}
+
+				if strings.HasSuffix(item.Name, getSharedObjectExt()) {
+					out, err := os.Create(filepath.Join(installArgs.prefix, "lib", item.Name))
+					if err != nil {
+						return err
+					}
+
+					fmt.Println("Copying", item.Name, "to", out.Name())
+					io.Copy(out, tarReader)
+					out.Close()
+				} else if strings.HasSuffix(item.Name, ".h") {
+					out, err := os.Create(filepath.Join(installArgs.prefix, "include", item.Name))
+					if err != nil {
+						return err
+					}
+
+					fmt.Println("Copying", item.Name, "to", out.Name())
+					io.Copy(out, tarReader)
+					out.Close()
+				}
+			}
+
+		}
+
+	}
+
+	return nil
+}
+
+func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error {
+	soFile := filepath.Join(uninstallArgs.prefix, "lib", getSharedObjectFileName())
+
+	fmt.Println("Removing", soFile)
+	err := os.Remove(soFile)
+	if err != nil {
+		return err
+	}
+
+	headerFile := filepath.Join(uninstallArgs.prefix, "include", "extism.h")
+	fmt.Println("Removing", headerFile)
+	err = os.Remove(headerFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runLibReleases(cmd *cobra.Command, args []string) error {
+	releases, err := getReleases(cmd.Context())
+	if err != nil {
+		return err
+	}
+
+	for i, rel := range releases {
+		if rel.TagName != nil {
+			if i == len(releases)-1 {
+				fmt.Println(*rel.TagName, "(latest)")
+			} else {
+				fmt.Println(*rel.TagName)
+			}
+		}
+	}
+
+	return nil
 }
 
 func libCmd() *cobra.Command {
@@ -72,6 +217,14 @@ func libCmd() *cobra.Command {
 	}
 	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local", "Prefix previously to used to install libextism")
 	lib.AddCommand(libUninstall)
+
+	// Releases
+	libReleases := &cobra.Command{
+		Use:   "releases",
+		Short: "List Extism release tags",
+		RunE:  runLibReleases,
+	}
+	lib.AddCommand(libReleases)
 
 	return lib
 }
