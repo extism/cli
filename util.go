@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"runtime"
 
 	"github.com/spf13/cobra"
@@ -8,7 +10,6 @@ import (
 
 type Args interface {
 	SetArgs(args []string)
-	GetArgs() []string
 }
 
 func runArgs[T Args](f func(cmd *cobra.Command, args T) error, call T) func(cmd *cobra.Command, args []string) error {
@@ -31,4 +32,19 @@ func getSharedObjectFileName() string {
 	} else {
 		return "libextism." + getSharedObjectExt()
 	}
+}
+
+func copyFile(src string, dest string) error {
+	fmt.Println("Copying", src, "to", dest)
+	bytesRead, err := ioutil.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(dest, bytesRead, 0755)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

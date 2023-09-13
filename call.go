@@ -33,10 +33,6 @@ func (a *callArgs) SetArgs(args []string) {
 	a.args = args
 }
 
-func (a *callArgs) GetArgs() []string {
-	return a.args
-}
-
 func (a *callArgs) getAllowedPaths() map[string]string {
 	allowedPaths := map[string]string{}
 	for _, path := range a.allowedPaths {
@@ -175,9 +171,10 @@ func callCmd() *cobra.Command {
 	call := &callArgs{}
 	cmd :=
 		&cobra.Command{
-			Use:   "call",
-			Short: "Call a plugin function",
-			RunE:  runArgs(runCall, call),
+			Use:          "call",
+			Short:        "Call a plugin function",
+			SilenceUsage: true,
+			RunE:         runArgs(runCall, call),
 		}
 	flags := cmd.Flags()
 	flags.StringVarP(&call.input, "input", "i", "", "Input data")

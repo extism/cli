@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -26,6 +27,7 @@ type libArgs struct {
 type libInstallArgs struct {
 	libArgs
 	version string
+	gitRepo string
 }
 
 type libUninstallArgs struct {
@@ -36,16 +38,8 @@ func (a *libInstallArgs) SetArgs(args []string) {
 	a.args = args
 }
 
-func (a *libInstallArgs) GetArgs() []string {
-	return a.args
-}
-
 func (a *libUninstallArgs) SetArgs(args []string) {
 	a.args = args
-}
-
-func (a *libUninstallArgs) GetArgs() []string {
-	return a.args
 }
 
 func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err error) {
@@ -96,7 +90,73 @@ func assetPrefix() string {
 	return s
 }
 
+func gitInstall(install *libInstallArgs) error {
+	repoPath := os.Getenv("EXTISM_PATH")
+	if repoPath == "" {
+		repoPath = install.gitRepo
+	}
+
+	if _, err := os.Stat(filepath.Join(repoPath, ".git")); err == nil {
+		cmd := exec.Command("git", "checkout", "main")
+		cmd.Dir = repoPath
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+
+		cmd = exec.Command("git", "pull", "origin", "main")
+		cmd.Dir = repoPath
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+	} else {
+		cmd := exec.Command("git", "clone", "https://github.com/extism/extism", repoPath)
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+	}
+
+	cmd := exec.Command("cargo", "build", "--release")
+	cmd.Dir = repoPath
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	ext := getSharedObjectExt()
+	dest := filepath.Join(install.prefix, "lib", "libextism."+ext)
+	src := filepath.Join(repoPath, "target", "release", "libextism."+ext)
+	if err := copyFile(src, dest); err != nil {
+		return err
+	}
+
+	hdest := filepath.Join(install.prefix, "include", "extism.h")
+	hsrc := filepath.Join(repoPath, "runtime", "extism.h")
+	if err := copyFile(hsrc, hdest); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
+	if installArgs.version == "git" || installArgs.gitRepo != "" {
+		if installArgs.gitRepo == "" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+
+			installArgs.gitRepo = filepath.Join(home, ".extism")
+		}
+		return gitInstall(installArgs)
+	}
+
 	rel, err := findRelease(cmd.Context(), installArgs.version)
 	if err != nil {
 		return err
@@ -198,31 +258,35 @@ func libCmd() *cobra.Command {
 	// Install
 	installArgs := &libInstallArgs{}
 	libInstall := &cobra.Command{
-		Use:   "install",
-		Short: "Install libextism",
-		RunE:  runArgs(runLibInstall, installArgs),
+		Use:          "install",
+		Short:        "Install libextism",
+		SilenceUsage: true,
+		RunE:         runArgs(runLibInstall, installArgs),
 	}
 	libInstall.Flags().StringVar(&installArgs.version, "version", "latest",
 		"Install a specified Extism version, `latest` can be used to specify the latest release and `git` can be used to install from git")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix to install libextism and extism.h into, the shared object will be copied to $PREFIX/lib and the header will be copied to $PREFIX/include")
+	libInstall.Flags().StringVar(&installArgs.gitRepo, "git", "", "Path to clone git repo into, this will automatically set --version=git")
 	lib.AddCommand(libInstall)
 
 	// Uninstall
 	uninstallArgs := &libUninstallArgs{}
 	libUninstall := &cobra.Command{
-		Use:   "uninstall",
-		Short: "Uninstall libextism",
-		RunE:  runArgs(runLibUninstall, uninstallArgs),
+		Use:          "uninstall",
+		Short:        "Uninstall libextism",
+		SilenceUsage: true,
+		RunE:         runArgs(runLibUninstall, uninstallArgs),
 	}
 	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local", "Prefix previously to used to install libextism")
 	lib.AddCommand(libUninstall)
 
 	// Versions
 	libVersions := &cobra.Command{
-		Use:   "versions",
-		Short: "List available Extism versions",
-		RunE:  runLibVersions,
+		Use:          "versions",
+		Short:        "List available Extism versions",
+		SilenceUsage: true,
+		RunE:         runLibVersions,
 	}
 	lib.AddCommand(libVersions)
 
