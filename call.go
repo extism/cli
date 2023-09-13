@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -25,6 +26,7 @@ type callArgs struct {
 	memoryMaxPages int
 	config         []string
 	setConfig      string
+	manifest       bool
 }
 
 func (a *callArgs) SetArgs(args []string) {
@@ -33,6 +35,46 @@ func (a *callArgs) SetArgs(args []string) {
 
 func (a *callArgs) GetArgs() []string {
 	return a.args
+}
+
+func (a *callArgs) getAllowedPaths() map[string]string {
+	allowedPaths := map[string]string{}
+	for _, path := range a.allowedPaths {
+		split := strings.SplitN(path, ":", 1)
+		switch len(split) {
+		case 1:
+			allowedPaths[path] = path
+		case 2:
+			allowedPaths[split[0]] = split[1]
+		default:
+			continue
+		}
+	}
+
+	return allowedPaths
+}
+
+func (a *callArgs) getConfig() (map[string]string, error) {
+	config := map[string]string{}
+	if a.setConfig != "" {
+		err := json.Unmarshal([]byte(a.setConfig), &config)
+		if err != nil {
+			return config,
+				errors.Join(errors.New("Invalid value for --set-config flag"), err)
+		}
+	}
+	for _, cfg := range a.config {
+		split := strings.SplitN(cfg, "=", 1)
+		switch len(split) {
+		case 1:
+			config[cfg] = ""
+		case 2:
+			config[split[0]] = split[1]
+		default:
+			continue
+		}
+	}
+	return config, nil
 }
 
 func runCall(cmd *cobra.Command, call *callArgs) error {
@@ -47,47 +89,47 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	wasm := call.args[0]
 	funcName := call.args[1]
 
-	allowedPaths := map[string]string{}
-
-	for _, path := range call.allowedPaths {
-		split := strings.SplitN(path, ":", 1)
-		switch len(split) {
-		case 1:
-			allowedPaths[path] = path
-		case 2:
-			allowedPaths[split[0]] = split[1]
-		default:
-			continue
+	// Manifest
+	var manifest extism.Manifest
+	if call.manifest {
+		f, err := os.Open(wasm)
+		if err != nil {
+			return err
 		}
+		err = json.NewDecoder(f).Decode(&manifest)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+	} else {
+		manifest.Wasm = append(manifest.Wasm, extism.WasmFile{Path: wasm})
 	}
 
-	config := map[string]string{}
-	err := json.Unmarshal([]byte(call.setConfig), &config)
+	// Allowed hosts
+	manifest.AllowedHosts = append(manifest.AllowedHosts, call.allowedHosts...)
+
+	// Allowed paths
+	if manifest.AllowedPaths == nil {
+		manifest.AllowedPaths = map[string]string{}
+	}
+
+	for k, v := range call.getAllowedPaths() {
+		manifest.AllowedPaths[k] = v
+	}
+
+	// Config
+	if manifest.Config == nil {
+		manifest.Config = map[string]string{}
+	}
+	config, err := call.getConfig()
 	if err != nil {
-		errors.Join(errors.New("Invalid value for --set-config flag"), err)
+		return err
+	}
+	for k, v := range config {
+		manifest.Config[k] = v
 	}
 
-	for _, cfg := range call.config {
-		split := strings.SplitN(cfg, "=", 1)
-		switch len(split) {
-		case 1:
-			allowedPaths[cfg] = ""
-		case 2:
-			allowedPaths[split[0]] = split[1]
-		default:
-			continue
-		}
-	}
-
-	manifest := extism.Manifest{
-		Wasm: []extism.Wasm{extism.WasmFile{
-			Path: wasm,
-		}},
-		AllowedPaths: allowedPaths,
-		AllowedHosts: call.allowedHosts,
-		Config:       config,
-	}
-
+	// Memory
 	if call.memoryMaxPages != 0 {
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
@@ -101,6 +143,8 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 
 	if call.timeout > 0 {
 		manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
+
+		// TODO: why do I have to set this myself?
 		ctx, cancel = context.WithTimeout(ctx, manifest.Timeout)
 	}
 	defer cancel()
@@ -111,6 +155,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 	defer plugin.Close()
 
+	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
 		_, res, err := plugin.Call(funcName, []byte(call.input))
 		if err != nil {
@@ -144,5 +189,6 @@ func callCmd() *cobra.Command {
 	flags.IntVar(&call.memoryMaxPages, "memory-max", 0, "Maximum number of pages to allocate")
 	flags.StringArrayVar(&call.config, "config", []string{}, "Set config values, should be in KEY=VALUE format")
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
+	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
 	return cmd
 }
