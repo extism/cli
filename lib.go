@@ -170,7 +170,7 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 	return nil
 }
 
-func runLibReleases(cmd *cobra.Command, args []string) error {
+func runLibVersions(cmd *cobra.Command, args []string) error {
 	releases, err := getReleases(cmd.Context())
 	if err != nil {
 		return err
@@ -218,13 +218,13 @@ func libCmd() *cobra.Command {
 	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local", "Prefix previously to used to install libextism")
 	lib.AddCommand(libUninstall)
 
-	// Releases
-	libReleases := &cobra.Command{
-		Use:   "releases",
-		Short: "List Extism release tags",
-		RunE:  runLibReleases,
+	// Versions
+	libVersions := &cobra.Command{
+		Use:   "versions",
+		Short: "List available Extism versions",
+		RunE:  runLibVersions,
 	}
-	lib.AddCommand(libReleases)
+	lib.AddCommand(libVersions)
 
 	return lib
 }
