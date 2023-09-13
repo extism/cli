@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"archive/tar"
@@ -249,7 +249,7 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func libCmd() *cobra.Command {
+func LibCmd() *cobra.Command {
 	lib := &cobra.Command{
 		Use:   "lib",
 		Short: "Manage libextism",

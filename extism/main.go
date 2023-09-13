@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/extism/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,7 @@ func main() {
 		Short: "A CLI for Extism plugins",
 	}
 
-	rootCmd.AddCommand(callCmd())
-	rootCmd.AddCommand(libCmd())
+	rootCmd.AddCommand(cli.CallCmd())
+	rootCmd.AddCommand(cli.LibCmd())
 	rootCmd.Execute()
 }

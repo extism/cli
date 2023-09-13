@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"context"
@@ -167,7 +167,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	return nil
 }
 
-func callCmd() *cobra.Command {
+func CallCmd() *cobra.Command {
 	call := &callArgs{}
 	cmd :=
 		&cobra.Command{
