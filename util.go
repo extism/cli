@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"io/ioutil"
-	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -16,21 +15,21 @@ func runArgs[T Args](f func(cmd *cobra.Command, args T) error, call T) func(cmd 
 	return func(cmd *cobra.Command, args []string) error { call.SetArgs(args); return f(cmd, call) }
 }
 
-func getSharedObjectExt() string {
-	if runtime.GOOS == "macos" {
+func getSharedObjectExt(os string) string {
+	if os == "darwin" || os == "macos" {
 		return "dylib"
-	} else if runtime.GOOS == "windows" {
+	} else if os == "windows" || os == "windows-gnu" {
 		return "dll"
 	} else {
 		return "so"
 	}
 }
 
-func getSharedObjectFileName() string {
-	if runtime.GOOS == "windows" {
-		return "extism." + getSharedObjectExt()
+func getSharedObjectFileName(os string) string {
+	if os == "windows" || os == "windows-gnu" {
+		return "extism." + getSharedObjectExt(os)
 	} else {
-		return "libextism." + getSharedObjectExt()
+		return "libextism." + getSharedObjectExt(os)
 	}
 }
 

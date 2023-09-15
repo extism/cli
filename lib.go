@@ -29,6 +29,8 @@ type libArgs struct {
 type libInstallArgs struct {
 	libArgs
 	version string
+	os      string
+	arch    string
 }
 
 type libUninstallArgs struct {
@@ -75,30 +77,35 @@ func findRelease(ctx context.Context, name string) (release *github.RepositoryRe
 	return release, errors.New("unable to find release " + name)
 }
 
-func assetPrefix() (string, error) {
-
+func assetPrefix(os, arch string) (string, error) {
 	s := "libextism-"
-	if runtime.GOARCH == "amd64" {
+	if arch == "amd64" {
 		s += "x86_64"
 	} else {
-		s += runtime.GOARCH
+		s += arch
 	}
-	if runtime.GOOS == "linux" {
+	if os == "linux" {
 		return s + "-unknown-linux-gnu", nil
-	} else if runtime.GOOS == "windows" {
+	} else if os == "windows" {
 		return s + "-pc-windows-msvc", nil
-	} else if runtime.GOOS == "darwin" {
+	} else if os == "windows-gnu" {
+		return s + "-pc-windows-gnu", nil
+	} else if os == "darwin" || os == "macos" {
 		return s + "-apple-darwin", nil
 	}
 
-	return "", errors.New("unsupported " + runtime.GOOS + " " + runtime.GOARCH)
+	return "", errors.New("unsupported " + os + " " + arch)
 }
 
-func sharedLibraryName() string {
-	switch runtime.GOOS {
+func sharedLibraryName(os string) string {
+	switch os {
 	case "darwin":
+		fallthrough
+	case "macos":
 		return "libextism.dylib"
 	case "windows":
+		fallthrough
+	case "windows-gnu":
 		return "extism.dll"
 	default:
 		return "libextism.so"
@@ -115,7 +122,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		return err
 	}
 
-	assetName, err := assetPrefix()
+	assetName, err := assetPrefix(installArgs.os, installArgs.arch)
 	if err != nil {
 		return err
 	}
@@ -142,7 +149,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					break
 				}
 
-				if strings.HasSuffix(item.Name, getSharedObjectExt()) {
+				if strings.HasSuffix(item.Name, getSharedObjectExt(installArgs.os)) {
 					os.MkdirAll(filepath.Join(installArgs.prefix, installArgs.libDir), 0o755)
 					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.libDir, item.Name))
 					if err != nil {
@@ -173,7 +180,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 }
 
 func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error {
-	soFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, getSharedObjectFileName())
+	soFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, getSharedObjectFileName(runtime.GOOS))
 
 	fmt.Println("Removing", soFile)
 	err := os.Remove(soFile)
@@ -210,7 +217,7 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 }
 
 func runLibCheck(cmd *cobra.Command, args []string) error {
-	ptr, err := dlopen(sharedLibraryName())
+	ptr, err := dlopen(sharedLibraryName(runtime.GOOS))
 	if err != nil {
 		return errors.New("unable to open libextism, no installation detected")
 	}
@@ -238,9 +245,11 @@ func LibCmd() *cobra.Command {
 	libInstall.Flags().StringVar(&installArgs.version, "version", "",
 		"Install a specified Extism version, `git` or `latest` can be used to specify the latest from git and no version will default to the most recent release")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
-		"Prefix to install libextism and extism.h into, the shared object will be copied to $PREFIX/lib and the header will be copied to $PREFIX/include")
+		"Prefix to install libextism and extism.h into, the shared object will be copied to $prefix/$libdir and the header will be copied to $prefix/$includedir")
 	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
 	libInstall.Flags().StringVar(&installArgs.includeDir, "includedir", "include", "The header file will be installed to $prefix/$includedir")
+	libInstall.Flags().StringVar(&installArgs.os, "os", runtime.GOOS, "The target OS: linux, darwin, windows")
+	libInstall.Flags().StringVar(&installArgs.arch, "arch", runtime.GOARCH, "The target architecture: x86_64, aarch64")
 	lib.AddCommand(libInstall)
 
 	// Uninstall
