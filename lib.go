@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -27,7 +26,6 @@ type libArgs struct {
 type libInstallArgs struct {
 	libArgs
 	version string
-	gitRepo string
 }
 
 type libUninstallArgs struct {
@@ -61,7 +59,7 @@ func findRelease(ctx context.Context, name string) (release *github.RepositoryRe
 	}
 
 	for i, rel := range releases {
-		if i == len(releases)-1 && name == "latest" {
+		if i == len(releases)-1 && name == "" {
 			return rel, nil
 		} else if rel.TagName != nil && *rel.TagName == name {
 			return rel, nil
@@ -90,71 +88,9 @@ func assetPrefix() string {
 	return s
 }
 
-func gitInstall(install *libInstallArgs) error {
-	repoPath := os.Getenv("EXTISM_PATH")
-	if repoPath == "" {
-		repoPath = install.gitRepo
-	}
-
-	if _, err := os.Stat(filepath.Join(repoPath, ".git")); err == nil {
-		cmd := exec.Command("git", "checkout", "main")
-		cmd.Dir = repoPath
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-		if err = cmd.Run(); err != nil {
-			return err
-		}
-
-		cmd = exec.Command("git", "pull", "origin", "main")
-		cmd.Dir = repoPath
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-		if err = cmd.Run(); err != nil {
-			return err
-		}
-	} else {
-		cmd := exec.Command("git", "clone", "https://github.com/extism/extism", repoPath)
-		cmd.Stderr = os.Stderr
-		cmd.Stdout = os.Stdout
-		if err = cmd.Run(); err != nil {
-			return err
-		}
-	}
-
-	cmd := exec.Command("cargo", "build", "--release")
-	cmd.Dir = repoPath
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	ext := getSharedObjectExt()
-	dest := filepath.Join(install.prefix, "lib", "libextism."+ext)
-	src := filepath.Join(repoPath, "target", "release", "libextism."+ext)
-	if err := copyFile(src, dest); err != nil {
-		return err
-	}
-
-	hdest := filepath.Join(install.prefix, "include", "extism.h")
-	hsrc := filepath.Join(repoPath, "runtime", "extism.h")
-	if err := copyFile(hsrc, hdest); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
-	if installArgs.version == "git" || installArgs.gitRepo != "" {
-		if installArgs.gitRepo == "" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return err
-			}
-
-			installArgs.gitRepo = filepath.Join(home, ".extism")
-		}
-		return gitInstall(installArgs)
+	if installArgs.version == "git" {
+		installArgs.version = "latest"
 	}
 
 	rel, err := findRelease(cmd.Context(), installArgs.version)
@@ -236,14 +172,13 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for i, rel := range releases {
-		if rel.TagName != nil {
-			if i == len(releases)-1 {
-				fmt.Println(*rel.TagName, "(latest)")
-			} else {
-				fmt.Println(*rel.TagName)
-			}
+	for _, rel := range releases {
+		name := rel.GetTagName()
+		if name == "latest" {
+			continue
 		}
+
+		fmt.Println(name)
 	}
 
 	return nil
@@ -263,11 +198,10 @@ func LibCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE:         runArgs(runLibInstall, installArgs),
 	}
-	libInstall.Flags().StringVar(&installArgs.version, "version", "latest",
-		"Install a specified Extism version, `latest` can be used to specify the latest release and `git` can be used to install from git")
+	libInstall.Flags().StringVar(&installArgs.version, "version", "",
+		"Install a specified Extism version, `git` can be used to specify the latest from git")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix to install libextism and extism.h into, the shared object will be copied to $PREFIX/lib and the header will be copied to $PREFIX/include")
-	libInstall.Flags().StringVar(&installArgs.gitRepo, "git", "", "Path to clone git repo into, this will automatically set --version=git")
 	lib.AddCommand(libInstall)
 
 	// Uninstall
