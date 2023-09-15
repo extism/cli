@@ -5,7 +5,7 @@ The [Extism](https://github.com/extism/extism) CLI can be used to execute Extism
 ## Installation
 
 ```shell
-$ go install github.com/extism/cli
+$ go install github.com/extism/cli/extism
 ```
 
 ### Call a plugin
