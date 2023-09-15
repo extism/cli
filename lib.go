@@ -63,6 +63,9 @@ func findRelease(ctx context.Context, name string) (release *github.RepositoryRe
 
 	for i, rel := range releases {
 		if i == len(releases)-1 && name == "" {
+			if rel.GetTagName() == "latest" {
+				return releases[len(releases)-2], nil
+			}
 			return rel, nil
 		} else if rel.TagName != nil && *rel.TagName == name {
 			return rel, nil
@@ -116,8 +119,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 	if err != nil {
 		return err
 	}
+
 	for _, asset := range rel.Assets {
 		if strings.HasPrefix(asset.GetName(), assetName) && strings.HasSuffix(asset.GetName(), ".tar.gz") {
+			fmt.Println("Installing", rel.GetTagName())
 			url := asset.GetBrowserDownloadURL()
 			fmt.Println("Fetching", url)
 			res, err := http.Get(url)
@@ -231,7 +236,7 @@ func LibCmd() *cobra.Command {
 		RunE:         runArgs(runLibInstall, installArgs),
 	}
 	libInstall.Flags().StringVar(&installArgs.version, "version", "",
-		"Install a specified Extism version, `git` can be used to specify the latest from git")
+		"Install a specified Extism version, `git` or `latest` can be used to specify the latest from git and no version will default to the most recent release")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix to install libextism and extism.h into, the shared object will be copied to $PREFIX/lib and the header will be copied to $PREFIX/include")
 	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
