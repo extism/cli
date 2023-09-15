@@ -83,7 +83,7 @@ func assetPrefix() string {
 	if runtime.GOOS == "linux" {
 		return s + "-unknown-linux-gnu"
 	} else if runtime.GOOS == "windows" {
-		return s + "-pc-windows-mvsc"
+		return s + "-pc-windows-msvc"
 	} else if runtime.GOOS == "darwin" {
 		return s + "-apple-darwin"
 	}
