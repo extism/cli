@@ -14,15 +14,18 @@ var banner string = `
 ╚══════╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝╚═════╝░╚═╝░░░░░╚═╝
 `
 
-func main() {
-	rootCmd := cobra.Command{
+func rootCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:     "extism",
 		Version: "0.2.0",
 		Long:    banner,
 		Short:   "A CLI for Extism, https://extism.org",
 	}
+	cmd.AddCommand(cli.CallCmd())
+	cmd.AddCommand(cli.LibCmd())
+	return cmd
+}
 
-	rootCmd.AddCommand(cli.CallCmd())
-	rootCmd.AddCommand(cli.LibCmd())
-	rootCmd.Execute()
+func main() {
+	rootCmd().Execute()
 }
