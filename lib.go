@@ -67,7 +67,7 @@ func findRelease(ctx context.Context, name string) (release *github.RepositoryRe
 		}
 	}
 
-	return release, errors.New("Unable to find release: " + name)
+	return release, errors.New("unable to find release " + name)
 }
 
 func assetPrefix() string {
@@ -199,7 +199,7 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 func runLibCheck(cmd *cobra.Command, args []string) error {
 	ptr, err := dlopen(sharedLibraryName())
 	if err != nil {
-		return errors.New("Unable to open libextism, no installation detected")
+		return errors.New("unable to open libextism, no installation detected")
 	}
 
 	var version func() string

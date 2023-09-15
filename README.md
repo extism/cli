@@ -28,22 +28,16 @@ $ extism lib versions
 
 ### Install libextism
 
-To install the latest version of `libextism` to `/usr/local`, this will update any existing installation:
+To install the latest version of `libextism` to `/usr/local`, this will overwrite any existing installation at the same path:
 
 ```shell
-$ sudo extism lib install --version latest
+$ sudo extism lib install
 ```
 
-To build the latest version from git:
+To build the latest build from github:
 
 ```shell
-$ extism lib install --version git --prefix ~/.local
-```
-
-This will clone the git repo into `~/.extism`, to configure a different directory:
-
-```shell
-$ extism lib install --git /path/to/repo --prefix ~/.local
+$ extism lib install --version git
 ```
 
 ### Uninstall libextism
@@ -59,3 +53,12 @@ Or from another prefix:
 ```shell
 $ extism lib uninstall --prefix ~/.local
 ```
+
+### Check a libextism installation
+
+The `lib check` command will print the version of the installed `libextism` library:
+
+```shell
+$ extism lib check
+```
+
