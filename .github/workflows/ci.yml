@@ -1,10 +1,12 @@
-on: [push, pull_request]
+on:
+  pull_request:
+  workflow_dispatch:
 
-name: CI
+name: Test
 
 jobs:
   install_latest_and_test:
-    name: Install & Test (latest build))
+    name: Install & Test (git latest)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -14,43 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          toolchain: ${{ matrix.rust }}
-          override: true
+          go-version: '1.20'
 
-      - name: Setup Python env
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-          check-latest: true
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install CLI and extism lib
+      - name: Install CLI
         run: |
-          pip3 install cffi
-          pip3 install .
-          extism -h
-        
-          extism install latest
+          go install ./extism
+          extism lib install --version latest
       
       - name: Test CLI
         run: |
-          echo "this is a test" | extism call test/code.wasm count_vowels
+          echo "this is a test" | extism call test/code.wasm count_vowels --stdin     
 
-      - name: Test CLI with /usr/local prefix install
-        run: |
-          extism uninstall
-          extism --prefix /usr/local install latest
-          
-          echo "this is a test" | extism call test/code.wasm count_vowels
-        
-
-  install_git_and_test:
-    name: Install & Test (from source)
+  install_release_and_test:
+    name: Install & Test (release)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -60,29 +41,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          toolchain: ${{ matrix.rust }}
-          override: true
+          go-version: '1.20'
 
-      - name: Setup Python env
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
-          check-latest: true
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install CLI and extism lib
+      - name: Install CLI
         run: |
-          pip3 install cffi
-          pip3 install .
-          extism -h
-        
-          extism install git
+          go install ./extism
+          extism lib install
       
       - name: Test CLI
         run: |
-          echo "this is a test" | extism call test/code.wasm count_vowels
+          echo "this is a test" | extism call test/code.wasm count_vowels --stdin     

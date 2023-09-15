@@ -27,6 +27,23 @@ type callArgs struct {
 	config         []string
 	setConfig      string
 	manifest       bool
+	stdin          bool
+}
+
+func readStdin() []byte {
+	var buf []byte = make([]byte, 4096)
+	var dest = []byte{}
+
+	for {
+		n, err := os.Stdin.Read(buf)
+		if err != nil || n == 0 {
+			break
+		}
+
+		dest = append(dest, buf[0:n]...)
+	}
+
+	return dest
 }
 
 func (a *callArgs) SetArgs(args []string) {
@@ -151,9 +168,14 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 	defer plugin.Close()
 
+	input := []byte(call.input)
+	if call.stdin {
+		input = readStdin()
+	}
+
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
-		_, res, err := plugin.Call(funcName, []byte(call.input))
+		_, res, err := plugin.Call(funcName, input)
 		if err != nil {
 			return err
 		}
@@ -178,6 +200,7 @@ func CallCmd() *cobra.Command {
 		}
 	flags := cmd.Flags()
 	flags.StringVarP(&call.input, "input", "i", "", "Input data")
+	flags.BoolVar(&call.stdin, "stdin", false, "Read input from stdin")
 	flags.IntVar(&call.loop, "loop", 1, "Number of times to call the function")
 	flags.BoolVar(&call.wasi, "wasi", false, "Enable WASI")
 	flags.StringArrayVar(&call.allowedPaths, "allow-path", []string{}, "Allow a path to be accessed from inside the Wasm sandbox, a path can be either a plain path or a map from HOST_PATH:GUEST_PATH")
