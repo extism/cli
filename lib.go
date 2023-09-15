@@ -20,8 +20,10 @@ import (
 )
 
 type libArgs struct {
-	args   []string
-	prefix string
+	args       []string
+	prefix     string
+	libDir     string
+	includeDir string
 }
 
 type libInstallArgs struct {
@@ -132,7 +134,8 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 				}
 
 				if strings.HasSuffix(item.Name, getSharedObjectExt()) {
-					out, err := os.Create(filepath.Join(installArgs.prefix, "lib", item.Name))
+					os.MkdirAll(filepath.Join(installArgs.prefix, installArgs.libDir), 0o755)
+					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.libDir, item.Name))
 					if err != nil {
 						return err
 					}
@@ -141,7 +144,8 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					io.Copy(out, tarReader)
 					out.Close()
 				} else if strings.HasSuffix(item.Name, ".h") {
-					out, err := os.Create(filepath.Join(installArgs.prefix, "include", item.Name))
+					os.MkdirAll(filepath.Join(installArgs.prefix, installArgs.includeDir), 0o755)
+					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.includeDir, item.Name))
 					if err != nil {
 						return err
 					}
@@ -160,7 +164,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 }
 
 func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error {
-	soFile := filepath.Join(uninstallArgs.prefix, "lib", getSharedObjectFileName())
+	soFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, getSharedObjectFileName())
 
 	fmt.Println("Removing", soFile)
 	err := os.Remove(soFile)
@@ -168,7 +172,7 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 		return err
 	}
 
-	headerFile := filepath.Join(uninstallArgs.prefix, "include", "extism.h")
+	headerFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.includeDir, "extism.h")
 	fmt.Println("Removing", headerFile)
 	err = os.Remove(headerFile)
 	if err != nil {
@@ -226,6 +230,8 @@ func LibCmd() *cobra.Command {
 		"Install a specified Extism version, `git` can be used to specify the latest from git")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix to install libextism and extism.h into, the shared object will be copied to $PREFIX/lib and the header will be copied to $PREFIX/include")
+	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
+	libInstall.Flags().StringVar(&installArgs.includeDir, "includedir", "include", "The header file will be installed to $prefix/$includedir")
 	lib.AddCommand(libInstall)
 
 	// Uninstall
@@ -237,6 +243,8 @@ func LibCmd() *cobra.Command {
 		RunE:         runArgs(runLibUninstall, uninstallArgs),
 	}
 	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local", "Prefix previously to used to install libextism")
+	libUninstall.Flags().StringVar(&uninstallArgs.libDir, "libdir", "lib", "The shared object will be removed from $prefix/$libdir")
+	libUninstall.Flags().StringVar(&uninstallArgs.includeDir, "includedir", "include", "The header file will be removed from $prefix/$includedir")
 	lib.AddCommand(libUninstall)
 
 	// Versions
