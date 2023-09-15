@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ebitengine/purego"
 	"github.com/google/go-github/github"
 	"github.com/spf13/cobra"
 )
@@ -81,11 +82,22 @@ func assetPrefix() string {
 		return s + "-unknown-linux-gnu"
 	} else if runtime.GOOS == "windows" {
 		return s + "-pc-windows-mvsc"
-	} else if runtime.GOOS == "macos" {
+	} else if runtime.GOOS == "darwin" {
 		return s + "-apple-darwin"
 	}
 
 	return s
+}
+
+func sharedLibraryName() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return "libextism.dylib"
+	case "windows":
+		return "extism.dll"
+	default:
+		return "libextism.so"
+	}
 }
 
 func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
@@ -184,6 +196,18 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func runLibCheck(cmd *cobra.Command, args []string) error {
+	ptr, err := dlopen(sharedLibraryName())
+	if err != nil {
+		return errors.New("Unable to open libextism, no installation detected")
+	}
+
+	var version func() string
+	purego.RegisterLibFunc(&version, ptr, "extism_version")
+	fmt.Println(version())
+	return nil
+}
+
 func LibCmd() *cobra.Command {
 	lib := &cobra.Command{
 		Use:   "lib",
@@ -223,6 +247,15 @@ func LibCmd() *cobra.Command {
 		RunE:         runLibVersions,
 	}
 	lib.AddCommand(libVersions)
+
+	// Check
+	libCheck := &cobra.Command{
+		Use:          "check",
+		Short:        "Check for libextism installation",
+		SilenceUsage: true,
+		RunE:         runLibCheck,
+	}
+	lib.AddCommand(libCheck)
 
 	return lib
 }

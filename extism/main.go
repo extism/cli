@@ -5,11 +5,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func main() {
+var banner string = `
+███████╗██╗░░██╗████████╗██╗░██████╗███╗░░░███╗
+██╔════╝╚██╗██╔╝╚══██╔══╝██║██╔════╝████╗░████║
+█████╗░░░╚███╔╝░░░░██║░░░██║╚█████╗░██╔████╔██║
+██╔══╝░░░██╔██╗░░░░██║░░░██║░╚═══██╗██║╚██╔╝██║
+███████╗██╔╝╚██╗░░░██║░░░██║██████╔╝██║░╚═╝░██║
+╚══════╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝╚═════╝░╚═╝░░░░░╚═╝
+`
 
+func main() {
 	rootCmd := cobra.Command{
-		Use:   "extism",
-		Short: "A CLI for Extism plugins",
+		Use:     "extism",
+		Version: "0.2.0",
+		Long:    banner,
+		Short:   "A CLI for Extism, https://extism.org",
 	}
 
 	rootCmd.AddCommand(cli.CallCmd())
