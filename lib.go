@@ -72,7 +72,7 @@ func findRelease(ctx context.Context, name string) (release *github.RepositoryRe
 	return release, errors.New("unable to find release " + name)
 }
 
-func assetPrefix() string {
+func assetPrefix() (string, error) {
 
 	s := "libextism-"
 	if runtime.GOARCH == "amd64" {
@@ -81,14 +81,14 @@ func assetPrefix() string {
 		s += runtime.GOARCH
 	}
 	if runtime.GOOS == "linux" {
-		return s + "-unknown-linux-gnu"
+		return s + "-unknown-linux-gnu", nil
 	} else if runtime.GOOS == "windows" {
-		return s + "-pc-windows-msvc"
+		return s + "-pc-windows-msvc", nil
 	} else if runtime.GOOS == "darwin" {
-		return s + "-apple-darwin"
+		return s + "-apple-darwin", nil
 	}
 
-	return s
+	return "", errors.New("unsupported " + runtime.GOOS + " " + runtime.GOARCH)
 }
 
 func sharedLibraryName() string {
@@ -112,8 +112,12 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		return err
 	}
 
+	assetName, err := assetPrefix()
+	if err != nil {
+		return err
+	}
 	for _, asset := range rel.Assets {
-		if strings.HasPrefix(asset.GetName(), assetPrefix()) && strings.HasSuffix(asset.GetName(), ".tar.gz") {
+		if strings.HasPrefix(asset.GetName(), assetName) && strings.HasSuffix(asset.GetName(), ".tar.gz") {
 			url := asset.GetBrowserDownloadURL()
 			fmt.Println("Fetching", url)
 			res, err := http.Get(url)
