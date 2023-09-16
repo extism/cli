@@ -157,7 +157,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	if call.timeout > 0 {
 		manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
 
-		// TODO: why do I have to set this myself?
+		// TODO: figure out why this is needed to get the timeout to work
 		ctx, cancel = context.WithTimeout(ctx, manifest.Timeout)
 	}
 	defer cancel()
