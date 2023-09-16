@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/extism/go-sdk"
 	"github.com/spf13/cobra"
@@ -23,7 +22,7 @@ type callArgs struct {
 	logLevel       *extism.LogLevel
 	allowedPaths   []string
 	allowedHosts   []string
-	timeout        int
+	timeout        uint64
 	memoryMaxPages int
 	config         []string
 	setConfig      string
@@ -156,7 +155,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	if call.timeout > 0 {
-		manifest.Timeout = time.Duration(call.timeout)
+		manifest.Timeout = call.timeout
 	}
 
 	plugin, err := extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
@@ -174,7 +173,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	for i := 0; i < call.loop; i++ {
 		exit, res, err := plugin.Call(funcName, input)
 		if err != nil {
-			if exit == sys.ExitCodeContextCanceled {
+			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")
 			}
 			return err
@@ -205,7 +204,7 @@ func CallCmd() *cobra.Command {
 	flags.BoolVar(&call.wasi, "wasi", false, "Enable WASI")
 	flags.StringArrayVar(&call.allowedPaths, "allow-path", []string{}, "Allow a path to be accessed from inside the Wasm sandbox, a path can be either a plain path or a map from HOST_PATH:GUEST_PATH")
 	flags.StringArrayVar(&call.allowedHosts, "allow-host", []string{}, "Allow access to an HTTP host, if no hosts are listed then all requests will fail. Globs may be used for wildcards")
-	flags.IntVar(&call.timeout, "timeout", 0, "Timeout in milliseconds")
+	flags.Uint64Var(&call.timeout, "timeout", 0, "Timeout in milliseconds")
 	flags.IntVar(&call.memoryMaxPages, "memory-max", 0, "Maximum number of pages to allocate")
 	flags.StringArrayVar(&call.config, "config", []string{}, "Set config values, should be in KEY=VALUE format")
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
