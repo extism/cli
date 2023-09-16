@@ -158,9 +158,9 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	cancel := func() {}
 	if call.timeout > 0 {
 		// TODO: figure out why setting Timeout isn't working
-		manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
+		// manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
 
-		// ctx, cancel = context.WithCancel(ctx)
+		ctx, cancel = context.WithCancel(ctx)
 	}
 	defer cancel()
 
@@ -175,12 +175,13 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		input = readStdin()
 	}
 
-	// if call.timeout > 0 {
-	// 	go func() {
-	// 		time.Sleep(time.Millisecond * time.Duration(call.timeout))
-	// 		cancel()
-	// 	}()
-	// }
+	if call.timeout > 0 {
+		go func() {
+			t := time.Millisecond * time.Duration(call.timeout)
+			time.Sleep(t)
+			cancel()
+		}()
+	}
 
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
