@@ -155,14 +155,9 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		EnableWasi:    call.wasi,
 	}
 
-	cancel := func() {}
 	if call.timeout > 0 {
-		// TODO: figure out why setting Timeout isn't working
-		// manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
-
-		ctx, cancel = context.WithCancel(ctx)
+		manifest.Timeout = time.Duration(call.timeout)
 	}
-	defer cancel()
 
 	plugin, err := extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
 	if err != nil {
@@ -173,14 +168,6 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	input := []byte(call.input)
 	if call.stdin {
 		input = readStdin()
-	}
-
-	if call.timeout > 0 {
-		go func() {
-			t := time.Millisecond * time.Duration(call.timeout)
-			time.Sleep(t)
-			cancel()
-		}()
 	}
 
 	// Call the plugin in a loop
