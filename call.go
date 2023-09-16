@@ -12,6 +12,7 @@ import (
 	"github.com/extism/go-sdk"
 	"github.com/spf13/cobra"
 	"github.com/tetratelabs/wazero"
+	"github.com/tetratelabs/wazero/sys"
 )
 
 type callArgs struct {
@@ -53,14 +54,14 @@ func (a *callArgs) SetArgs(args []string) {
 func (a *callArgs) getAllowedPaths() map[string]string {
 	allowedPaths := map[string]string{}
 	for _, path := range a.allowedPaths {
-		split := strings.SplitN(path, ":", 1)
+		split := strings.Split(path, ":")
 		switch len(split) {
 		case 1:
 			allowedPaths[path] = path
 		case 2:
 			allowedPaths[split[0]] = split[1]
 		default:
-			continue
+			allowedPaths[split[0]] = strings.Join(split[1:], ":")
 		}
 	}
 
@@ -77,13 +78,14 @@ func (a *callArgs) getConfig() (map[string]string, error) {
 		}
 	}
 	for _, cfg := range a.config {
-		split := strings.SplitN(cfg, "=", 1)
+		split := strings.SplitN(cfg, "=", 2)
 		switch len(split) {
 		case 1:
 			config[cfg] = ""
 		case 2:
 			config[split[0]] = split[1]
 		default:
+			fmt.Println(3)
 			continue
 		}
 	}
@@ -98,7 +100,6 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	ctx := context.Background()
-	cancel := func() {}
 	wasm := call.args[0]
 	funcName := call.args[1]
 
@@ -154,11 +155,12 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		EnableWasi:    call.wasi,
 	}
 
+	cancel := func() {}
 	if call.timeout > 0 {
+		// TODO: figure out why setting Timeout isn't working
 		manifest.Timeout = time.Millisecond * time.Duration(call.timeout)
 
-		// TODO: figure out why this is needed to get the timeout to work
-		ctx, cancel = context.WithTimeout(ctx, manifest.Timeout)
+		// ctx, cancel = context.WithCancel(ctx)
 	}
 	defer cancel()
 
@@ -173,10 +175,20 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		input = readStdin()
 	}
 
+	// if call.timeout > 0 {
+	// 	go func() {
+	// 		time.Sleep(time.Millisecond * time.Duration(call.timeout))
+	// 		cancel()
+	// 	}()
+	// }
+
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
-		_, res, err := plugin.Call(funcName, input)
+		exit, res, err := plugin.Call(funcName, input)
 		if err != nil {
+			if exit == sys.ExitCodeContextCanceled {
+				return errors.New("timeout")
+			}
 			return err
 		}
 		fmt.Print(string(res))
