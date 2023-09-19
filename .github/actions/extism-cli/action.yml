@@ -1,0 +1,36 @@
+on: [workflow_call]
+
+name: Extism CLI
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout sources
+      uses: actions/checkout@v3
+      with:
+        repository: extism/cli
+        path: .extism-cli
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 'latest'
+
+    - name: Cache extism-cli
+      id: cache-extism-cli
+      uses: actions/cache@v3
+      with:
+        path: runtime/target/**
+        key: extism-cli-${{ hashFiles('.extism-cli/**') }}
+
+    - name: Build
+      if: steps.cache-extism-cli.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd .extism-cli/extism
+        go build -o extism .
+
+    - name: Install extism shared library
+      shell: bash
+      run: |
+        sudo cp .extism-cli/extism/extism /usr/local/bin/extism
