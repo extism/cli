@@ -35,4 +35,4 @@ runs:
     - name: Install extism shared library
       shell: bash
       run: |
-        sudo cp .extism-cli/extism/extism /usr/local/bin/extism
+        sudo mv .extism-cli/extism/extism /usr/local/bin
