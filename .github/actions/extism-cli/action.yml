@@ -1,4 +1,5 @@
-on: [workflow_call]
+on: 
+  workflow_call:
 
 name: Extism CLI
 
@@ -21,8 +22,8 @@ runs:
       id: cache-extism-cli
       uses: actions/cache@v3
       with:
-        path: runtime/target/**
-        key: extism-cli-${{ hashFiles('.extism-cli/**') }}
+        path: .extism-cli/extism/extism
+        key: extism-cli-${{ hashFiles('.extism-cli/.git/HEAD') }}
 
     - name: Build
       if: steps.cache-extism-cli.outputs.cache-hit != 'true'
