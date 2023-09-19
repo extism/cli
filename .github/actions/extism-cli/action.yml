@@ -23,7 +23,7 @@ runs:
       uses: actions/cache@v3
       with:
         path: .extism-cli/extism/extism
-        key: extism-cli-${{ hashFiles('.extism-cli/.git/HEAD') }}
+        key: extism-cli-${{ hashFiles('.extism-cli/**.go') }}-${{ hashFiles('.extism-cli/go.mod') }}-${{ hashFiles('.extism-cli/go.sum') }}
 
     - name: Build
       if: steps.cache-extism-cli.outputs.cache-hit != 'true'
