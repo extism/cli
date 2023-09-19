@@ -19,7 +19,7 @@ jobs:
 
       - name: Install lib
         run: |
-          extism lib install --version latest
+          sudo extism lib install --version latest || exit 1
       
       - name: Test CLI
         run: |
@@ -44,7 +44,7 @@ jobs:
 
       - name: Install lib
         run: |
-          extism lib install
+          sudo extism lib install || exit 1
       
       - name: Test CLI
         run: |
