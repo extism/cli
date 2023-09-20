@@ -20,12 +20,12 @@ jobs:
       - name: Install lib
         if: ${{ matrix.os }} == "macos-latest"
         run: |
-          sudo extism --github-token "" lib install --version latest --verbose
+          sudo extism lib install --version latest --verbose
 
       - name: Install lib
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
-          sudo extism lib install --version latest --verbose
+          sudo extism --github-token "" lib install --version latest --verbose
       
       - name: Test CLI
         run: |
@@ -46,16 +46,13 @@ jobs:
       - name: Install lib
         if: ${{ matrix.os }} == "macos-latest"
         run: |
-          sudo extism --github-token "" lib install --verbose
+          sudo extism lib install --verbose
 
       - name: Install lib
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
-          sudo extism lib install --verbose
+          sudo extism --github-token "" lib install --verbose
 
-      - name: List releases
-        run: extism lib versions
-      
       - name: Test CLI
         run: |
           echo "this is a test" | extism call test/code.wasm count_vowels --stdin     
