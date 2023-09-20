@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -46,4 +47,21 @@ func copyFile(src string, dest string) error {
 	}
 
 	return nil
+}
+
+var LoggingEnabled = false
+var PrintingDisabled = false
+
+func Log(s ...any) {
+	if LoggingEnabled {
+		log.Println(s...)
+	}
+}
+
+func Print(s ...any) {
+	if LoggingEnabled {
+		Log(s...)
+	} else if !PrintingDisabled {
+		fmt.Println(s...)
+	}
 }

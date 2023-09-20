@@ -105,6 +105,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	// Manifest
 	var manifest extism.Manifest
 	if call.manifest {
+		Log("Reading from manifest:", wasm)
 		f, err := os.Open(wasm)
 		if err != nil {
 			return err
@@ -113,12 +114,15 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		if err != nil {
 			return err
 		}
+		Log("Read manifest:", manifest)
 		defer f.Close()
 	} else {
+		Log("Adding wasm file to manifest:", wasm)
 		manifest.Wasm = append(manifest.Wasm, extism.WasmFile{Path: wasm})
 	}
 
 	// Allowed hosts
+	Log("Adding allowed hosts:", call.allowedHosts)
 	manifest.AllowedHosts = append(manifest.AllowedHosts, call.allowedHosts...)
 
 	// Allowed paths
@@ -127,6 +131,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	for k, v := range call.getAllowedPaths() {
+		Log("Adding path mapping:", k +":"+v)
 		manifest.AllowedPaths[k] = v
 	}
 
@@ -139,11 +144,13 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		return err
 	}
 	for k, v := range config {
+		Log("Adding config key", k+"="+v)
 		manifest.Config[k] = v
 	}
 
 	// Memory
 	if call.memoryMaxPages != 0 {
+		Log("Max pages", call.memoryMaxPages)
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
 
@@ -155,9 +162,11 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	if call.timeout > 0 {
+		Log("Setting timeout", call.timeout)
 		manifest.Timeout = call.timeout
 	}
 
+	Log("Creating plugin")
 	plugin, err := extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
 	if err != nil {
 		return err
@@ -166,11 +175,14 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 
 	input := []byte(call.input)
 	if call.stdin {
+		Log("Reading input from stdin")
 		input = readStdin()
 	}
+	Log("Got", len(input), "bytes of input data")
 
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
+		Log("Calling", funcName)
 		exit, res, err := plugin.Call(funcName, input)
 		if err != nil {
 			if exit == sys.ExitCodeDeadlineExceeded {

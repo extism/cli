@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -46,41 +45,56 @@ func (a *libUninstallArgs) SetArgs(args []string) {
 }
 
 func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err error) {
+	Log("Fetching releases from Github")
 	client := github.NewClient(http.DefaultClient)
 	releases, _, err = client.Repositories.ListReleases(ctx, "extism", "extism", nil)
 	if err != nil {
 		return releases, err
 	}
+	Log("Found", len(releases), "releases")
 	sort.Slice(releases, func(i, j int) bool {
-		return releases[i].CreatedAt.Before(releases[j].CreatedAt.Time)
+		return releases[i].CreatedAt.After(releases[j].CreatedAt.Time)
 	})
 	return releases, nil
 }
 
-func findRelease(ctx context.Context, name string) (release *github.RepositoryRelease, err error) {
+func findRelease(ctx context.Context, tag string) (release *github.RepositoryRelease, err error) {
 	releases, err := getReleases(ctx)
 	if err != nil {
 		return release, err
 	}
 
-	for i, rel := range releases {
-		if i == len(releases)-1 && name == "" {
-			if rel.GetTagName() == "latest" {
-				return releases[len(releases)-2], nil
-			}
-			return rel, nil
-		} else if rel.TagName != nil && *rel.TagName == name {
+	if tag == "" {
+		Log("Getting most recent release")
+	} else {
+		Log("Searching for releases tagged with version:", tag)
+	}
+
+	if tag == "" {
+		rel := releases[0]
+		if rel.GetTagName() == "latest" {
+			rel = releases[1]
+		}
+		Log("Found", rel.URL, "published at", rel.PublishedAt) 
+		return rel, nil
+	}
+
+	for _, rel := range releases {
+		if strings.HasPrefix(rel.GetTagName(), tag) {
+			Log("Found", rel.URL, "published at", rel.PublishedAt) 
 			return rel, nil
 		}
 	}
 
-	return release, errors.New("unable to find release " + name)
+	return nil, errors.New("unable to find release " + tag)
 }
 
 func assetPrefix(os, arch string) (string, error) {
 	s := "libextism-"
 	if arch == "amd64" {
 		s += "x86_64"
+	} else if arch == "arm64" {
+		s += "aarch64"
 	} else {
 		s += arch
 	}
@@ -113,7 +127,9 @@ func sharedLibraryName(os string) string {
 }
 
 func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
+	Log("Searching for release matching", installArgs.version)
 	if installArgs.version == "git" {
+		Log("Converting version from `git` to `latest` ")
 		installArgs.version = "latest"
 	}
 
@@ -127,20 +143,25 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		return err
 	}
 
+	Log("Searching for asset matching:", assetName)
 	for _, asset := range rel.Assets {
 		if strings.HasPrefix(asset.GetName(), assetName) && strings.HasSuffix(asset.GetName(), ".tar.gz") {
-			fmt.Println("Installing", rel.GetTagName())
+			Print("Installing", rel.GetTagName())
 			url := asset.GetBrowserDownloadURL()
-			fmt.Println("Fetching", url)
+			Print("Fetching", url)
 			res, err := http.Get(url)
 			if err != nil {
 				return err
 			}
 			defer res.Body.Close()
+
+			Log("Creating gzip reader")
 			r, err := gzip.NewReader(res.Body)
 			if err != nil {
 				return err
 			}
+
+			Log("Reading tar file")
 			tarReader := tar.NewReader(r)
 
 			for {
@@ -150,46 +171,56 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 				}
 
 				if strings.HasSuffix(item.Name, getSharedObjectExt(installArgs.os)) {
-					os.MkdirAll(filepath.Join(installArgs.prefix, installArgs.libDir), 0o755)
+					Log("Found shared object file in tarball")
+					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
+					Log("Creating directory for lib:", lib)
+					os.MkdirAll(lib, 0o755)
 					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.libDir, item.Name))
 					if err != nil {
 						return err
 					}
 
-					fmt.Println("Copying", item.Name, "to", out.Name())
+					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
 					out.Close()
 				} else if strings.HasSuffix(item.Name, ".h") {
-					os.MkdirAll(filepath.Join(installArgs.prefix, installArgs.includeDir), 0o755)
+					Log("Found header file in tarball")
+					include := filepath.Join(installArgs.prefix, installArgs.includeDir)
+					Log("Creating directory for header file:", include) 
+					os.MkdirAll(include, 0o755)
 					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.includeDir, item.Name))
 					if err != nil {
 						return err
 					}
 
-					fmt.Println("Copying", item.Name, "to", out.Name())
+					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
 					out.Close()
+				} else {
+					Log("File:", item.Name)
 				}
 			}
-
+			return nil
+		} else {
+			Log("Invalid asset:", asset.GetName())
 		}
 
 	}
 
-	return nil
+	return errors.New("No release asset found matching "+assetName)
 }
 
 func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error {
+	Log("Installing files from prefix:", uninstallArgs.prefix)
 	soFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, getSharedObjectFileName(runtime.GOOS))
-
-	fmt.Println("Removing", soFile)
+	Print("Removing", soFile)
 	err := os.Remove(soFile)
 	if err != nil {
 		return err
 	}
 
 	headerFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.includeDir, "extism.h")
-	fmt.Println("Removing", headerFile)
+	Print("Removing", headerFile)
 	err = os.Remove(headerFile)
 	if err != nil {
 		return err
@@ -204,27 +235,32 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	Log("Found", len(releases))
+
 	for _, rel := range releases {
 		name := rel.GetTagName()
 		if name == "latest" {
 			continue
 		}
 
-		fmt.Println(name)
+		Print(name)
 	}
 
 	return nil
 }
 
 func runLibCheck(cmd *cobra.Command, args []string) error {
-	ptr, err := dlopen(sharedLibraryName(runtime.GOOS))
+	soName := sharedLibraryName(runtime.GOOS)
+	Log("dlopen", soName)
+	ptr, err := dlopen(soName)
 	if err != nil {
 		return errors.New("unable to open libextism, no installation detected")
 	}
 
+	Log("Registering extism_version func")
 	var version func() string
 	purego.RegisterLibFunc(&version, ptr, "extism_version")
-	fmt.Println(version())
+	Print(version())
 	return nil
 }
 

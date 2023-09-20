@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
 )
@@ -21,11 +23,16 @@ func rootCmd() *cobra.Command {
 		Long:    banner,
 		Short:   "A CLI for Extism, https://extism.org",
 	}
+	cmd.PersistentFlags().BoolVarP(&cli.LoggingEnabled, "verbose", "v", false, "Enable additional logging")
+	cmd.PersistentFlags().BoolVarP(&cli.PrintingDisabled, "quiet", "q", false, "Enable additional logging")
 	cmd.AddCommand(cli.CallCmd())
 	cmd.AddCommand(cli.LibCmd())
 	return cmd
 }
 
 func main() {
-	rootCmd().Execute()
+	err := rootCmd().Execute()
+	if err != nil {
+		os.Exit(1)
+	}
 }
