@@ -44,11 +44,11 @@ func (a *libUninstallArgs) SetArgs(args []string) {
 	a.args = args
 }
 
-func getReleases(ctx context.Context, token string) (releases []*github.RepositoryRelease, err error) {
+func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err error) {
 	Log("Fetching releases from Github")
 	client := github.NewClient(nil)
-	if token != "" {
-		client = client.WithAuthToken(token)
+	if GithubToken != "" {
+		client = client.WithAuthToken(GithubToken)
 	}
 	releases, _, err = client.Repositories.ListReleases(ctx, "extism", "extism", nil)
 	if err != nil {
@@ -61,8 +61,8 @@ func getReleases(ctx context.Context, token string) (releases []*github.Reposito
 	return releases, nil
 }
 
-func findRelease(ctx context.Context, token string, tag string) (release *github.RepositoryRelease, err error) {
-	releases, err := getReleases(ctx, token)
+func findRelease(ctx context.Context, tag string) (release *github.RepositoryRelease, err error) {
+	releases, err := getReleases(ctx)
 	if err != nil {
 		return release, err
 	}
@@ -136,7 +136,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		installArgs.version = "latest"
 	}
 
-	rel, err := findRelease(cmd.Context(), installArgs.version, GithubToken)
+	rel, err := findRelease(cmd.Context(), installArgs.version)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 }
 
 func runLibVersions(cmd *cobra.Command, args []string) error {
-	releases, err := getReleases(cmd.Context(), GithubToken)
+	releases, err := getReleases(cmd.Context())
 	if err != nil {
 		return err
 	}
