@@ -19,7 +19,7 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism lib install --version latest --verbose
+          sudo extism --github-token "" lib install --version latest --verbose
       
       - name: Test CLI
         run: |
@@ -39,7 +39,7 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism lib install --verbose
+          sudo extism --github-token "" lib install --verbose
 
       - name: List releases
         run: extism lib versions
