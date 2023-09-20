@@ -19,7 +19,9 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --version latest --verbose
+          sudo extism lib install --version latest --verbose
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Test CLI
         run: |
@@ -39,7 +41,9 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --verbose
+          sudo extism lib install --verbose
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: List releases
         run: extism lib versions
