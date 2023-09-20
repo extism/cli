@@ -25,7 +25,8 @@ func rootCmd() *cobra.Command {
 	}
 	cmd.PersistentFlags().BoolVarP(&cli.LoggingEnabled, "verbose", "v", false, "Enable additional logging")
 	cmd.PersistentFlags().BoolVarP(&cli.PrintingDisabled, "quiet", "q", false, "Enable additional logging")
-	cmd.PersistentFlags().StringVar(&cli.GithubToken, "github-token", "", "Github access token")
+	cmd.PersistentFlags().StringVar(&cli.GithubToken, "github-token", os.Getenv("GITHUB_TOKEN"),
+		"Github access token, can also be set using the $GITHUB_TOKEN env variable")
 	cmd.AddCommand(cli.CallCmd())
 	cmd.AddCommand(cli.LibCmd())
 	return cmd
