@@ -19,7 +19,7 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism lib install --version latest || exit 1
+          sudo extism --github-token ${{ github.token }} lib install --version latest
       
       - name: Test CLI
         run: |
@@ -39,7 +39,10 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism lib install || exit 1
+          sudo extism --github-token ${{ github.token }} lib install
+
+      - name: List releases
+        run: extism lib versions
       
       - name: Test CLI
         run: |

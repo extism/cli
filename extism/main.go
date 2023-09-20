@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	
+
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +25,7 @@ func rootCmd() *cobra.Command {
 	}
 	cmd.PersistentFlags().BoolVarP(&cli.LoggingEnabled, "verbose", "v", false, "Enable additional logging")
 	cmd.PersistentFlags().BoolVarP(&cli.PrintingDisabled, "quiet", "q", false, "Enable additional logging")
+	cmd.PersistentFlags().StringVar(&cli.GithubToken, "github-token", "", "Github access token")
 	cmd.AddCommand(cli.CallCmd())
 	cmd.AddCommand(cli.LibCmd())
 	return cmd

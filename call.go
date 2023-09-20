@@ -84,7 +84,6 @@ func (a *callArgs) getConfig() (map[string]string, error) {
 		case 2:
 			config[split[0]] = split[1]
 		default:
-			fmt.Println(3)
 			continue
 		}
 	}
@@ -131,7 +130,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	for k, v := range call.getAllowedPaths() {
-		Log("Adding path mapping:", k +":"+v)
+		Log("Adding path mapping:", k+":"+v)
 		manifest.AllowedPaths[k] = v
 	}
 
@@ -190,6 +189,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 			}
 			return err
 		}
+		Log("Call returned", len(res), "bytes")
 		fmt.Print(string(res))
 
 		if call.loop > 1 {

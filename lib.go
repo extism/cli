@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/ebitengine/purego"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v55/github"
 	"github.com/spf13/cobra"
 )
 
@@ -44,9 +44,12 @@ func (a *libUninstallArgs) SetArgs(args []string) {
 	a.args = args
 }
 
-func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err error) {
+func getReleases(ctx context.Context, token string) (releases []*github.RepositoryRelease, err error) {
 	Log("Fetching releases from Github")
-	client := github.NewClient(http.DefaultClient)
+	client := github.NewClient(nil)
+	if token != "" {
+		client = client.WithAuthToken(token)
+	}
 	releases, _, err = client.Repositories.ListReleases(ctx, "extism", "extism", nil)
 	if err != nil {
 		return releases, err
@@ -58,8 +61,8 @@ func getReleases(ctx context.Context) (releases []*github.RepositoryRelease, err
 	return releases, nil
 }
 
-func findRelease(ctx context.Context, tag string) (release *github.RepositoryRelease, err error) {
-	releases, err := getReleases(ctx)
+func findRelease(ctx context.Context, token string, tag string) (release *github.RepositoryRelease, err error) {
+	releases, err := getReleases(ctx, token)
 	if err != nil {
 		return release, err
 	}
@@ -75,13 +78,13 @@ func findRelease(ctx context.Context, tag string) (release *github.RepositoryRel
 		if rel.GetTagName() == "latest" {
 			rel = releases[1]
 		}
-		Log("Found", rel.URL, "published at", rel.PublishedAt) 
+		Log("Found", rel.URL, "published at", rel.PublishedAt)
 		return rel, nil
 	}
 
 	for _, rel := range releases {
 		if strings.HasPrefix(rel.GetTagName(), tag) {
-			Log("Found", rel.URL, "published at", rel.PublishedAt) 
+			Log("Found", rel.URL, "published at", rel.PublishedAt)
 			return rel, nil
 		}
 	}
@@ -133,7 +136,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		installArgs.version = "latest"
 	}
 
-	rel, err := findRelease(cmd.Context(), installArgs.version)
+	rel, err := findRelease(cmd.Context(), installArgs.version, GithubToken)
 	if err != nil {
 		return err
 	}
@@ -186,7 +189,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 				} else if strings.HasSuffix(item.Name, ".h") {
 					Log("Found header file in tarball")
 					include := filepath.Join(installArgs.prefix, installArgs.includeDir)
-					Log("Creating directory for header file:", include) 
+					Log("Creating directory for header file:", include)
 					os.MkdirAll(include, 0o755)
 					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.includeDir, item.Name))
 					if err != nil {
@@ -207,7 +210,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 
 	}
 
-	return errors.New("No release asset found matching "+assetName)
+	return errors.New("No release asset found matching " + assetName)
 }
 
 func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error {
@@ -230,7 +233,7 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 }
 
 func runLibVersions(cmd *cobra.Command, args []string) error {
-	releases, err := getReleases(cmd.Context())
+	releases, err := getReleases(cmd.Context(), GithubToken)
 	if err != nil {
 		return err
 	}

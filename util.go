@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var LoggingEnabled = false
+var PrintingDisabled = false
+var GithubToken = ""
+
 type Args interface {
 	SetArgs(args []string)
 }
@@ -35,7 +39,7 @@ func getSharedObjectFileName(os string) string {
 }
 
 func copyFile(src string, dest string) error {
-	fmt.Println("Copying", src, "to", dest)
+	Print("Copying", src, "to", dest)
 	bytesRead, err := ioutil.ReadFile(src)
 	if err != nil {
 		return err
@@ -48,9 +52,6 @@ func copyFile(src string, dest string) error {
 
 	return nil
 }
-
-var LoggingEnabled = false
-var PrintingDisabled = false
 
 func Log(s ...any) {
 	if LoggingEnabled {
