@@ -19,11 +19,11 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism --github-token ${{ github.token }} lib install --version latest
+          sudo extism --github-token ${{ github.token }} lib install --version latest --verbose
       
       - name: Test CLI
         run: |
-          echo "this is a test" | extism call test/code.wasm count_vowels --stdin     
+          echo "this is a test" | extism call test/code.wasm count_vowels --stdin
 
   install_release_and_test:
     name: Install & Test (release)
@@ -39,7 +39,7 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo extism --github-token ${{ github.token }} lib install
+          sudo extism --github-token ${{ github.token }} lib install --verbose
 
       - name: List releases
         run: extism lib versions
