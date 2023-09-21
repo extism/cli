@@ -1,33 +1,64 @@
-# extism-cli
+# extism CLI
 
-The `extism` CLI is used to manage [Extism](https://github.com/extism/extism) installations
+The [Extism](https://github.com/extism/extism) CLI can be used to execute Extism plugins and manage libextism installations.
 
-## Install
+## Installation
 
-Using curl:
-
-```sh
-$ curl https://raw.githubusercontent.com/extism/cli/main/install.sh | sh
+```shell
+$ go install github.com/extism/cli/extism
 ```
 
-Using pip:
+### Call a plugin
 
-```sh
-$ pip3 install git+https://github.com/extism/cli
+The following will call the `count_vowels` function in the `count-vowels.wasm` module with the input "qwertyuiop":
+
+```shell
+$ extism call count-vowels.wasm count_vowels --input qwertyuiop
 ```
 
-## Usage
+See `extism call --help` for a list of all the flags
 
-The simplest use-case is to download an build the source code then install the library and header file into 
-the installation prefix of your choice.
+### Listing libextism versions
 
-```sh
-$ extism install latest # install to /usr/local/lib and /usr/local/include
-$ extism install git # build and install from source
+To list the available libextism versions:
+
+```shell
+$ extism lib versions
 ```
 
-By default the prefix is `/usr/local`, but it can easily be configured:
+### Install libextism
 
-```sh
-$ extism --prefix ~/.local install
+To install the latest version of `libextism` to `/usr/local`, this will overwrite any existing installation at the same path:
+
+```shell
+$ sudo extism lib install
 ```
+
+To build the latest build from github:
+
+```shell
+$ extism lib install --version git
+```
+
+### Uninstall libextism
+
+To uninstall the shared object and header installed in `/usr/local`:
+
+```shell
+$ sudo extism lib uninstall
+```
+
+Or from another prefix:
+
+```shell
+$ extism lib uninstall --prefix ~/.local
+```
+
+### Check a libextism installation
+
+The `lib check` command will print the version of the installed `libextism` library:
+
+```shell
+$ extism lib check
+```
+
