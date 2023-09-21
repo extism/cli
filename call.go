@@ -19,7 +19,7 @@ type callArgs struct {
 	input          string
 	loop           int
 	wasi           bool
-	logLevel       *extism.LogLevel
+	logLevel       string
 	allowedPaths   []string
 	allowedHosts   []string
 	timeout        uint64
@@ -153,10 +153,24 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
 
+	var logLevel extism.LogLevel = extism.Off
+	switch call.logLevel {
+	case "info":
+		logLevel = extism.Info
+	case "debug":
+		logLevel = extism.Debug
+	case "warn":
+		logLevel = extism.Warn
+	case "error":
+		logLevel = extism.Error
+	case "trace":
+		logLevel = extism.Trace
+	}
+
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig:  wazero.NewModuleConfig().WithSysWalltime(),
 		RuntimeConfig: wazero.NewRuntimeConfig().WithCloseOnContextDone(call.timeout > 0),
-		LogLevel:      call.logLevel,
+		LogLevel:      &logLevel,
 		EnableWasi:    call.wasi,
 	}
 
@@ -221,5 +235,6 @@ func CallCmd() *cobra.Command {
 	flags.StringArrayVar(&call.config, "config", []string{}, "Set config values, should be in KEY=VALUE format")
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
 	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
+	flags.StringVar(&call.logLevel, "log-level", "", "Set log level: trace, debug, warn, info, error")
 	return cmd
 }
