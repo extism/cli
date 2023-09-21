@@ -3,6 +3,16 @@ on:
 
 name: Extism CLI
 
+inputs:
+  install_path:
+    description: 'Path to install extism executable'
+    required: false
+    default: '/usr/local/bin'
+  sudo:
+    description: 'Sudo executable'
+    required: false
+    default: 'sudo'
+
 runs:
   using: composite
   steps:
@@ -32,7 +42,7 @@ runs:
         cd .extism-cli/extism
         go build -o extism .
 
-    - name: Install extism shared library
+    - name: Install extism executable
       shell: bash
       run: |
-        sudo mv .extism-cli/extism/extism /usr/local/bin
+        ${{ inputs.sudo }} mv .extism-cli/extism/extism ${{ inputs.install_path }}
