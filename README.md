@@ -10,11 +10,14 @@ $ go install github.com/extism/cli/extism@latest
 
 ### Call a plugin
 
-The following will call the `count_vowels` function in the `count-vowels.wasm` module with the input "qwertyuiop":
+The following will call the `count_vowels` function in the `count_vowels.wasm` module with the input "qwertyuiop":
 
 ```shell
-$ extism call count-vowels.wasm count_vowels --input qwertyuiop
+$ PLUGIN_URL="https://github.com/extism/plugins/releases/latest/download/count_vowels.wasm"
+$ extism call $PLUGIN_URL count_vowels --input qwertyuiop
 ```
+
+> **Note**: The first parameter to `call` can also be a path to a Wasm file on disk.
 
 See `extism call --help` for a list of all the flags
 
