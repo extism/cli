@@ -116,8 +116,13 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		Log("Read manifest:", manifest)
 		defer f.Close()
 	} else {
-		Log("Adding wasm file to manifest:", wasm)
-		manifest.Wasm = append(manifest.Wasm, extism.WasmFile{Path: wasm})
+		if strings.HasPrefix(wasm, "http://") || strings.HasPrefix(wasm, "https://") {
+			Log("Loading wasm file as url:", wasm)
+			manifest.Wasm = append(manifest.Wasm, extism.WasmUrl{Url: wasm})
+		} else {
+			Log("Adding wasm file to manifest:", wasm)
+			manifest.Wasm = append(manifest.Wasm, extism.WasmFile{Path: wasm})
+		}
 	}
 
 	// Allowed hosts
