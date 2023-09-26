@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/ebitengine/purego v0.4.0
-	github.com/extism/go-sdk v0.0.0-20230918161733-7064bd3a9602
+	github.com/extism/go-sdk v0.0.0-20230921104358-9dae66a1d252
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/spf13/cobra v1.7.0
 	github.com/tetratelabs/wazero v1.3.0
