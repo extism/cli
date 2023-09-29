@@ -35,12 +35,18 @@ To install the latest version of `libextism` to `/usr/local`, this will overwrit
 
 ```shell
 sudo extism lib install
+
+# if this fails, try:
+# sudo PATH=$PATH env extism lib install
 ```
 
 To build the latest build from github:
 
 ```shell
-extism lib install --version git
+sudo extism lib install --version git
+
+# if this fails, try:
+# sudo PATH=$PATH env extism lib install --version git
 ```
 
 ### Uninstall libextism
@@ -49,12 +55,18 @@ To uninstall the shared object and header installed in `/usr/local`:
 
 ```shell
 sudo extism lib uninstall
+
+# if this fails, try:
+# sudo PATH=$PATH env extism lib uninstall
 ```
 
 Or from another prefix:
 
 ```shell
-extism lib uninstall --prefix ~/.local
+sudo extism lib uninstall --prefix ~/.local
+
+# if this fails, try:
+# sudo PATH=$PATH env extism lib install
 ```
 
 ### Check a libextism installation
