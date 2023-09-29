@@ -34,13 +34,19 @@ extism lib versions
 To install the latest version of `libextism` to `/usr/local`, this will overwrite any existing installation at the same path:
 
 ```shell
-sudo extism lib install
+sudo PATH=$PATH env extism lib install
 ```
 
-To build the latest build from github:
+To install to `$HOME/.local`:
 
 ```shell
-extism lib install --version git
+extism lib install --prefix ~/.local
+```
+
+To install the latest build from github:
+
+```shell
+sudo PATH=$PATH env extism lib install --version git
 ```
 
 ### Uninstall libextism
@@ -48,7 +54,7 @@ extism lib install --version git
 To uninstall the shared object and header installed in `/usr/local`:
 
 ```shell
-sudo extism lib uninstall
+sudo PATH=$PATH env extism lib uninstall
 ```
 
 Or from another prefix:
