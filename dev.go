@@ -1,16 +1,19 @@
 package cli
 
 import (
+	_ "embed"
 	"encoding/json"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
-	"os"
-	"path/filepath"
-
 	"github.com/spf13/cobra"
 )
+
+//go:embed repos.json
+var repos []byte
 
 type repoCategory int
 
@@ -75,95 +78,12 @@ func (r repo) Split() (string, string) {
 	return userName, repoName
 }
 
-var defaultRepos []repo = []repo{
-	{
-		Url:      "git@github.com:extism/extism",
-		Category: Runtime,
-	},
-	{
-		Url:      "git@github.com:extism/go-sdk",
-		Category: Runtime,
-	},
-	{
-		Url:      "git@github.com:extism/js-sdk",
-		Category: Runtime,
-	},
-	{
-		Url:      "git@github.com:extism/python-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/ruby-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/elixir-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/php-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/haskell-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/ocaml-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/cpp-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/java-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/dotnet-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/zig-sdk",
-		Category: SDK,
-	},
-	{
-		Url:      "git@github.com:extism/zig-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/go-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/rust-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/assemblyscript-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/c-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/haskell-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/js-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/dotnet-pdk",
-		Category: PDK,
-	},
-	{
-		Url:      "git@github.com:extism/extism-dbg",
-		Category: Other,
-	},
+var defaultRepos []repo
+
+func init() {
+	if err := json.Unmarshal(repos, &defaultRepos); err != nil {
+		panic(err)
+	}
 }
 
 type devArgs struct {

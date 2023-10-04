@@ -1,0 +1,82 @@
+[
+    {
+        "url": "git@github.com:extism/extism",
+        "category": "runtime"
+    },
+    {
+        "url": "git@github.com:extism/go-sdk",
+        "category": "runtime"
+    },
+    {
+        "url": "git@github.com:extism/js-sdk",
+        "category": "runtime"
+    },
+    {
+        "url": "git@github.com:extism/python-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/ruby-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/elixir-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/php-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/haskell-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/ocaml-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/cpp-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/java-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/dotnet-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/zig-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/zig-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/go-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/rust-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/assemblyscript-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/c-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/haskell-pdk",
+        "category": "pdk"
+    },
+    {
+        "url": "git@github.com:extism/extism-dbg",
+        "category": "other"
+    }
+]
