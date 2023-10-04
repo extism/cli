@@ -63,7 +63,6 @@ func (a *callArgs) getAllowedPaths() map[string]string {
 			allowedPaths[split[0]] = strings.Join(split[1:], ":")
 		}
 	}
-
 	return allowedPaths
 }
 
