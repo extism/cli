@@ -153,6 +153,14 @@ var defaultRepos []repo = []repo{
 		Category: PDK,
 	},
 	{
+		Url:      "git@github.com:extism/js-pdk",
+		Category: PDK,
+	},
+	{
+		Url:      "git@github.com:extism/dotnet-pdk",
+		Category: PDK,
+	},
+	{
 		Url:      "git@github.com:extism/extism-dbg",
 		Category: Other,
 	},
