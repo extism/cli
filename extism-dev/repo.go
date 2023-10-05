@@ -81,7 +81,7 @@ func (r repo) split() (string, string) {
 	return userName, repoName
 }
 
-func (repo repo) clone(root string) {
+func (repo repo) clone(root string) bool {
 	cli.Log("Initializing", repo.Url)
 	userName, repoName := repo.split()
 	os.MkdirAll(userName, 0o755)
@@ -91,13 +91,15 @@ func (repo repo) clone(root string) {
 	_, err := os.Stat(full)
 	if err == nil {
 		cli.Print("Warning:", repo.Url, "already exists")
-		return
+		return true
 	}
 
 	cli.Log("Running git clone", repo.Url, full)
 	if err := exec.Command("git", "clone", repo.Url, full).Run(); err != nil {
 		cli.Print("Warning: git clone", repo.Url, "failed:", err)
 	}
+
+	return false
 }
 
 var defaultRepos []repo

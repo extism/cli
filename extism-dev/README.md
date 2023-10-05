@@ -26,12 +26,24 @@ extism-dev init ~/devel
 This will download all the repos into `~/dev` using the github orginization as the namespace.
 For example, `git@github.com:extism/extism` will be downloaded into `~/dev/extism/extism`
 
+It will also create a `.extism.dev.json` file in the root directory that is used to configure which repos to include. This file can be
+updated using `extism-dev add` and `extism-dev remove`.
+
 ### Exec
 
-Once the environment is setup, you can use `extism-dev exec` to run commands in every repo
+Once the environment is setup, you can use `extism-dev exec` to run commands in every repo. For example, 
+to list every open PR using 'gh':
 
 ```shell
-extism-dev exec pwd
+extism-dev exec 'gh pr list'
 ```
 
-This will print the path of each command
+### Find
+
+`extism-dev find` can be used to search all the repos at once and do regex-based text substitution.
+
+To replace the version of the "base64" crate in every `Cargo.toml` file:
+
+```shell
+extism-dev find --filename 'Cargo.toml' 'base64 = ".*"' --replace 'base64 = "1.0.0"'
+```
