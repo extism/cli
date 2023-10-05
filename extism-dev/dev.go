@@ -180,7 +180,7 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 			return search.Iter(func(path string) error {
 				lock.Lock()
 				defer lock.Unlock()
-				if !args.prompt("Edit", path) {
+				if !args.prompt("Edit ", path) {
 					return nil
 				}
 				cli.Print("Editing", path)

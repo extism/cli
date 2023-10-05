@@ -17,7 +17,6 @@ type Search struct {
 	paths           []string
 	rx              *regexp.Regexp
 	filterFilenames *regexp.Regexp
-	prompt          []string
 	args            *devFindArgs
 }
 
@@ -88,49 +87,58 @@ func (search *Search) Iter(f func(string) error) error {
 }
 
 func (search *Search) Replace(r string) error {
+	f := func(path string) {
+		ignore, err := gitignore.FromGit()
+		if err != nil {
+			ignore, _ = gitignore.New()
+		}
+		ignore.Walk(path, func(path string, entry fs.FileInfo, err error) error {
+			if entry.IsDir() || !entry.Mode().IsRegular() {
+				return nil
+			}
+
+			abs, err := filepath.Abs(path)
+			if err != nil {
+				return err
+			}
+
+			data, err := ioutil.ReadFile(abs)
+			if err != nil {
+				return err
+			}
+
+			if search.filterFilenames != nil {
+				if !search.filterFilenames.Match([]byte(abs)) {
+					return nil
+				}
+			}
+
+			if search.rx.Match(data) {
+				if !search.args.prompt("Update ", path) {
+					return nil
+				}
+				cli.Print("Updating", abs)
+				data := search.rx.ReplaceAll(data, []byte(r))
+				return ioutil.WriteFile(abs, data, entry.Mode().Perm())
+			}
+
+			return nil
+		})
+	}
+
+	if search.args.interactive {
+		for _, path := range search.paths {
+			f(path)
+		}
+		return nil
+	}
+
 	wg := sync.WaitGroup{}
 	for _, path := range search.paths {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			if len(search.prompt) > 0 {
-				if !search.args.prompt("Edit", path) {
-					return
-				}
-			}
-			ignore, err := gitignore.FromGit()
-			if err != nil {
-				ignore, _ = gitignore.New()
-			}
-			ignore.Walk(path, func(path string, entry fs.FileInfo, err error) error {
-				if entry.IsDir() || !entry.Mode().IsRegular() {
-					return nil
-				}
-
-				abs, err := filepath.Abs(path)
-				if err != nil {
-					return err
-				}
-
-				data, err := ioutil.ReadFile(abs)
-				if err != nil {
-					return err
-				}
-
-				if search.filterFilenames != nil {
-					if !search.filterFilenames.Match([]byte(abs)) {
-						return nil
-					}
-				}
-
-				if search.rx.Match(data) {
-					cli.Print("Updating", abs)
-					data := search.rx.ReplaceAll(data, []byte(r))
-					return ioutil.WriteFile(abs, data, entry.Mode().Perm())
-				}
-
-				return nil
-			})
+			f(path)
 		}(path)
 	}
 	wg.Wait()
