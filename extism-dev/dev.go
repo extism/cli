@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -121,7 +122,23 @@ type devFindArgs struct {
 func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 	rg, err := exec.LookPath("rg")
 	if err != nil {
-		return errors.New("unable to find `rg` executable, install using `cargo install ripgrep`")
+		fmt.Println("ripgrep isn't installed, would you like to install using `cargo` [y/n]?")
+		c := 'n'
+		_, err := fmt.Scanf("%c\n", &c)
+		if err != nil {
+			return err
+		}
+		if c == 'y' {
+			cmd := exec.Command("cargo", "install", "ripgrep")
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				return err
+			}
+
+		} else {
+			return errors.New("unable to find `rg` executable, install using `cargo install ripgrep`")
+		}
 	}
 
 	if args.edit {
