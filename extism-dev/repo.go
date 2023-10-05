@@ -70,6 +70,11 @@ type repo struct {
 	Category repoCategory `json:"category"`
 }
 
+func (r repo) path() string {
+	a, b := r.split()
+	return filepath.Join(Root, a, b)
+}
+
 func (r repo) split() (string, string) {
 	split := strings.Split(r.Url, "/")
 	userName := split[len(split)-2]
@@ -81,12 +86,12 @@ func (r repo) split() (string, string) {
 	return userName, repoName
 }
 
-func (repo repo) clone(root string) bool {
+func (repo repo) clone() bool {
 	cli.Log("Initializing", repo.Url)
 	userName, repoName := repo.split()
 	os.MkdirAll(userName, 0o755)
 
-	full := filepath.Join(root, userName, repoName)
+	full := filepath.Join(Root, userName, repoName)
 	cli.Print("Cloning", repo.Url, "to", full)
 	_, err := os.Stat(full)
 	if err == nil {

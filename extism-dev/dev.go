@@ -1,14 +1,8 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
-	"sync"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -16,286 +10,6 @@ import (
 
 type extismData struct {
 	Repos []repo `json:"repos"`
-}
-
-type devInitArgs struct {
-	devArgs
-	parallel int
-	local    bool
-}
-
-func runDevInit(cmd *cobra.Command, args *devInitArgs) error {
-	args.root = args.args[0]
-	data, err := args.loadDataFile()
-	if err != nil {
-		data = &extismData{
-			Repos: defaultRepos,
-		}
-	} else {
-		args.mergeRepos(data)
-	}
-
-	cli.Print("Initializing Extism dev repos in", args.root)
-	err = os.MkdirAll(args.root, 0o755)
-	if err != nil && !os.IsExist(err) {
-		return err
-	}
-
-	pool := NewPool(args.parallel)
-	for _, r := range data.Repos {
-		cli.Log("Repos", data.Repos)
-		RunTask(pool, func(repo repo) {
-			repo.clone(args.root)
-		}, r)
-	}
-	pool.Wait()
-
-	if !args.local {
-		if err := args.link(); err != nil {
-			return err
-		}
-	}
-
-	if err := args.saveDataFile(data); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type devExecArgs struct {
-	devArgs
-	category string
-	repo     string
-	shell    string
-	parallel int
-}
-
-func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
-	data, err := args.loadDataFile()
-	if err != nil {
-		return err
-	}
-
-	rx := &regexp.Regexp{}
-	if args.repo != "" {
-		rx = regexp.MustCompile(args.repo)
-	}
-
-	pool := NewPool(args.parallel)
-	for i, r := range data.Repos {
-		RunTask(pool, func(repo repo) {
-			if args.category != "" && repo.Category.String() != args.category {
-				return
-			}
-
-			if args.repo != "" {
-				if !rx.MatchString(repo.Url) {
-					return
-				}
-			}
-			userName, repoName := repo.split()
-			p := filepath.Join(args.root, userName, repoName)
-			cli.Log("Executing", args.args[0], "in", p, "using", args.shell)
-			if args.parallel <= 1 {
-				if i > 0 {
-					cli.Print()
-					cli.Print(p)
-				}
-			}
-			cmd := exec.Command(args.shell, "-c", args.args[0])
-			cmd.Dir = p
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Env = os.Environ()
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+args.root)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+filepath.Join(args.root, "extism", "extism"))
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
-			cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(args.root, ".bin"))
-			if err := cmd.Run(); err != nil {
-				cli.Print("Error: command failed in", p)
-			}
-		}, r)
-	}
-	pool.Wait()
-	return nil
-}
-
-type devFindArgs struct {
-	devArgs
-	category    string
-	filename    string
-	edit        bool
-	editor      string
-	repo        string
-	replace     string
-	interactive bool
-}
-
-func (a *devFindArgs) prompt(msg ...any) bool {
-	if !a.interactive {
-		return true
-	}
-
-	fmt.Print(msg...)
-	fmt.Print("? [y/n] ")
-
-	c := 'n'
-	_, err := fmt.Scanf("%c\n", &c)
-	if err != nil {
-		cli.Log("prompt failed:", err)
-		return false
-	}
-	return c == 'y'
-}
-
-func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
-	data, err := args.loadDataFile()
-	if err != nil {
-		return err
-	}
-	query := ""
-	if len(args.args) > 0 {
-		query = args.args[0]
-	}
-	dirs := []string{}
-
-	repoRegex := &regexp.Regexp{}
-	if args.repo != "" {
-		repoRegex = regexp.MustCompile(args.repo)
-	}
-
-	for _, repo := range data.Repos {
-		if args.repo != "" {
-			if !repoRegex.MatchString(repo.Url) {
-				continue
-			}
-		}
-		if args.category == "" || repo.Category.String() == args.category {
-			userName, repoName := repo.split()
-			p := filepath.Join(args.root, userName, repoName)
-			dirs = append(dirs, p)
-		}
-	}
-
-	search := NewSearch(args, query, dirs...)
-	if args.filename != "" {
-		search.FilterFilenames(args.filename)
-	}
-
-	if args.replace != "" {
-		return search.Replace(args.replace)
-	} else {
-		if args.edit {
-			lock := sync.Mutex{}
-			return search.Iter(func(path string) error {
-				lock.Lock()
-				defer lock.Unlock()
-				if !args.prompt("Edit ", path) {
-					return nil
-				}
-				cli.Print("Editing", path)
-				cmd := exec.Command(args.editor, path)
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				cmd.Stdin = os.Stdin
-				return cmd.Run()
-			})
-		} else {
-			return search.Iter(func(path string) error {
-				cli.Print(path)
-				return nil
-			})
-		}
-	}
-
-}
-
-type devAddArgs struct {
-	devArgs
-	url      string
-	category string
-}
-
-func runDevAdd(cmd *cobra.Command, args *devAddArgs) error {
-	args.url = args.args[0]
-	data, err := args.loadDataFile()
-	if err != nil {
-		return err
-	}
-
-	r := repo{
-		Url: args.url,
-	}
-	r.Category.Parse(args.category)
-	if !r.clone(args.root) {
-		return errors.New(fmt.Sprint("Unable to clone repo:", r.Url))
-	}
-	for _, s := range data.Repos {
-		if s.Url == r.Url {
-			cli.Print("Repo already exists, not adding")
-			return nil
-		}
-	}
-	data.Repos = append(data.Repos, r)
-
-	args.saveDataFile(data)
-	return nil
-}
-
-type devRemoveArgs struct {
-	devArgs
-	url  string
-	keep bool
-}
-
-func runDevRemove(cmd *cobra.Command, args *devRemoveArgs) error {
-	args.url = args.args[0]
-	data, err := args.loadDataFile()
-	if err != nil {
-		return err
-	}
-
-	out := []repo{}
-	for _, s := range data.Repos {
-		if !strings.HasSuffix(s.Url, args.url) {
-			out = append(out, s)
-		} else {
-			userName, repoName := s.split()
-			p := filepath.Join(args.root, userName, repoName)
-			err = os.RemoveAll(p)
-			if err != nil {
-				cli.Print("Error: unable to remove", p)
-				out = append(out, s)
-			}
-		}
-	}
-	data.Repos = out
-	args.saveDataFile(data)
-	return nil
-}
-
-type devListArgs struct {
-	devArgs
-	category string
-}
-
-func runDevList(cmd *cobra.Command, args *devListArgs) error {
-	data, err := args.loadDataFile()
-	if err != nil {
-		return err
-	}
-
-	for _, repo := range data.Repos {
-		if args.category != "" && repo.Category.String() != args.category {
-			continue
-		}
-		userName, repoName := repo.split()
-		p := filepath.Join(args.root, userName, repoName)
-		cli.Print(repo.Url, "\t", p)
-	}
-	return nil
 }
 
 func homeDir() string {
@@ -320,11 +34,14 @@ func getDefaultRoot() (string, error) {
 	return defaultRoot, nil
 }
 
+var Root string = ""
+
 func SetupDevCmd(dev *cobra.Command) error {
 	defaultRoot, err := getDefaultRoot()
 	if err != nil {
 		return err
 	}
+	dev.PersistentFlags().StringVar(&Root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 
 	// Init
 	initArgs := &devInitArgs{}
@@ -333,10 +50,11 @@ func SetupDevCmd(dev *cobra.Command) error {
 		Short:        "Initialize dev repos",
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevInit, initArgs),
-		Args:         cobra.ExactArgs(1),
+		Args:         cobra.NoArgs,
 	}
 	devInit.Flags().IntVarP(&initArgs.parallel, "parallel", "p", 4, "Number of repos to download in parallel")
 	devInit.Flags().BoolVar(&initArgs.local, "local", false, "Do not set as global extism-dev path")
+	devInit.MarkPersistentFlagRequired("root")
 	dev.AddCommand(devInit)
 
 	// Exec
@@ -353,7 +71,6 @@ func SetupDevCmd(dev *cobra.Command) error {
 	if defaultShell == "" {
 		defaultShell = "sh"
 	}
-	devExec.Flags().StringVar(&execArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devExec.Flags().StringVarP(&execArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devExec.Flags().StringVarP(&execArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
 	devExec.Flags().StringVarP(&execArgs.shell, "shell", "s", defaultShell, "Shell to use when executing commands")
@@ -372,7 +89,6 @@ func SetupDevCmd(dev *cobra.Command) error {
 	if defaultEditor == "" {
 		defaultEditor = "/usr/bin/editor"
 	}
-	devFind.Flags().StringVar(&findArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devFind.Flags().StringVarP(&findArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devFind.Flags().StringVarP(&findArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
 	devFind.Flags().StringVar(&findArgs.filename, "filename", "", "Filter for filenames")
@@ -391,7 +107,6 @@ func SetupDevCmd(dev *cobra.Command) error {
 		RunE:         cli.RunArgs(runDevAdd, addArgs),
 		Args:         cobra.ExactArgs(1),
 	}
-	devAdd.Flags().StringVar(&addArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devAdd.Flags().StringVarP(&addArgs.category, "category", "c", "other", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devAdd)
 
@@ -405,7 +120,6 @@ func SetupDevCmd(dev *cobra.Command) error {
 		RunE:         cli.RunArgs(runDevRemove, removeArgs),
 		Args:         cobra.ExactArgs(1),
 	}
-	devRemove.Flags().StringVar(&removeArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devRemove.Flags().BoolVar(&removeArgs.keep, "keep", false, "Don't remove directory after removing repo")
 	dev.AddCommand(devRemove)
 
@@ -429,9 +143,19 @@ func SetupDevCmd(dev *cobra.Command) error {
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevList, listArgs),
 	}
-	devList.Flags().StringVar(&listArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devList.Flags().StringVarP(&listArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devList)
+
+	// Update
+	updateArgs := &devUpdateArgs{}
+	devUpdate := &cobra.Command{
+		Use:          "update",
+		Short:        "Common batch updates",
+		SilenceUsage: true,
+		RunE:         cli.RunArgs(runDevUpdate, updateArgs),
+	}
+	devUpdate.Flags().BoolVar(&updateArgs.kernel, "kernel", false, "Update kernel files across repos")
+	dev.AddCommand(devUpdate)
 
 	return nil
 }

@@ -11,11 +11,14 @@ import (
 
 type devArgs struct {
 	args []string
-	root string
+}
+
+func (a devArgs) Path(p ...string) string {
+	return filepath.Join(Root, filepath.Join(p...))
 }
 
 func (a devArgs) loadDataFile() (*extismData, error) {
-	p := filepath.Join(a.root, ".extism.dev.json")
+	p := filepath.Join(Root, ".extism.dev.json")
 	cli.Log("Loading data file from", p)
 	f, err := os.Open(p)
 	if err != nil {
@@ -32,7 +35,7 @@ func (a devArgs) loadDataFile() (*extismData, error) {
 }
 
 func (a devArgs) saveDataFile(data *extismData) error {
-	p := filepath.Join(a.root, ".extism.dev.json")
+	p := filepath.Join(Root, ".extism.dev.json")
 	cli.Log("Saving data file to", p)
 	f, err := os.Create(p)
 	if err != nil {
@@ -46,7 +49,7 @@ func (a devArgs) saveDataFile(data *extismData) error {
 
 func (a devArgs) link() error {
 	dest := filepath.Join(homeDir(), ".extism.dev")
-	abs, err := filepath.Abs(a.root)
+	abs, err := filepath.Abs(Root)
 	if err != nil {
 		return err
 	}

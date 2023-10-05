@@ -14,19 +14,22 @@ import (
 )
 
 type Search struct {
-	paths           []string
+	repos           []repo
 	rx              *regexp.Regexp
 	filterFilenames *regexp.Regexp
 	args            *devFindArgs
 }
 
-func NewSearch(args *devFindArgs, query string, paths ...string) *Search {
+func NewSearch(args *devFindArgs, query string, repos ...repo) *Search {
+	if args == nil {
+		args = &devFindArgs{}
+	}
 	var rx *regexp.Regexp
 	if query != "" {
 		rx = regexp.MustCompile(query)
 	}
 	return &Search{
-		paths:           paths,
+		repos:           repos,
 		rx:              rx,
 		filterFilenames: nil,
 		args:            args,
@@ -40,7 +43,8 @@ func (search *Search) FilterFilenames(filter string) *Search {
 
 func (search *Search) Iter(f func(string) error) error {
 	wg := sync.WaitGroup{}
-	for _, path := range search.paths {
+	for _, r := range search.repos {
+		path := r.path()
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
@@ -127,19 +131,19 @@ func (search *Search) Replace(r string) error {
 	}
 
 	if search.args.interactive {
-		for _, path := range search.paths {
-			f(path)
+		for _, r := range search.repos {
+			f(r.path())
 		}
 		return nil
 	}
 
 	wg := sync.WaitGroup{}
-	for _, path := range search.paths {
+	for _, r := range search.repos {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
 			f(path)
-		}(path)
+		}(r.path())
 	}
 	wg.Wait()
 
