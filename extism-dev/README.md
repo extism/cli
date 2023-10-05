@@ -4,9 +4,8 @@ A command-line tool for managing Extism repos
 
 ## Dependencies
 
+- go
 - git
-- ripgrep
-  - `cargo install ripgrep`
 
 ## Installation
 

@@ -1,13 +1,12 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -117,112 +116,145 @@ type devFindArgs struct {
 	edit     bool
 	editor   string
 	repo     string
+	replace  string
 }
 
 func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
-	rg, err := exec.LookPath("rg")
-	if err != nil {
-		fmt.Println("ripgrep isn't installed, would you like to install using `cargo` [y/n]?")
-		c := 'n'
-		_, err := fmt.Scanf("%c\n", &c)
-		if err != nil {
-			return err
-		}
-		if c == 'y' {
-			cmd := exec.Command("cargo", "install", "ripgrep")
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				return err
-			}
-
-		} else {
-			return errors.New("unable to find `rg` executable, install using `cargo install ripgrep`")
-		}
-	}
-
-	if args.edit {
-		_, err := exec.LookPath(args.editor)
-		if err != nil {
-			return errors.New("editor not found: " + args.editor)
-		}
-	}
-
-	cmdArgs := []string{"--color", "never", "--files-with-matches"}
-
-	if args.filename != "" {
-		cmdArgs = append(cmdArgs, "-g", args.filename)
-
-		if len(args.args) == 0 {
-			cmdArgs = append(cmdArgs, "--files")
-		}
-	}
-
-	if len(args.args) > 0 {
-		cmdArgs = append(cmdArgs, args.args...)
-	}
-
 	data, err := args.loadDataFile()
 	if err != nil {
 		return err
 	}
 
-	rx := &regexp.Regexp{}
+	query := ""
+	if len(args.args) > 0 {
+		query = args.args[0]
+	}
+	dirs := []string{}
+
+	repoRegex := &regexp.Regexp{}
 	if args.repo != "" {
-		rx = regexp.MustCompile(args.repo)
+		repoRegex = regexp.MustCompile(args.repo)
 	}
 
 	for _, repo := range data.Repos {
-		if args.category != "" && repo.Category.String() != args.category {
-			continue
-		}
-
 		if args.repo != "" {
-			if !rx.MatchString(repo.Url) {
+			if !repoRegex.MatchString(repo.Url) {
 				continue
 			}
 		}
-		userName, repoName := repo.split()
-		p := filepath.Join(args.root, userName, repoName)
-		a := cmdArgs[:]
-		a = append(a, p)
-		cmd := exec.Command(rg, a...)
-		if !args.edit {
-			cmd.Stdout = os.Stdout
+		if args.category == "" || repo.Category.String() == args.category {
+			userName, repoName := repo.split()
+			p := filepath.Join(args.root, userName, repoName)
+			dirs = append(dirs, p)
 		}
-		// cmd.Stderr = os.Stderr
-		cmd.Env = os.Environ()
-		cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+args.root)
-		cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+filepath.Join(args.root, "extism", "extism"))
-		cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
-		cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
-		cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(args.root, ".bin"))
-		if !args.edit {
-			if err := cmd.Run(); err != nil {
-				cli.Log("rg returned non-zero exit code in", p+":", err)
-			}
-		} else {
-			output, err := cmd.Output()
-			if err != nil {
-				cli.Log("rg returned non-zero exit code in", p+":", err)
-				continue
-			}
+	}
 
-			lines := strings.Split(string(output), "\n")
-			for _, line := range lines {
-				if len(line) == 0 {
-					continue
-				}
-				cli.Print(line)
-				cmd := exec.Command(args.editor, line)
+	search := NewSearch(query, dirs...)
+	if args.filename != "" {
+		search.FilterFilenames(args.filename)
+	}
+
+	if args.replace != "" {
+		return search.Replace(args.replace)
+	} else {
+		if args.edit {
+			lock := sync.Mutex{}
+			return search.Iter(func(path string) error {
+				lock.Lock()
+				defer lock.Unlock()
+				cli.Print("Editing", path)
+				cmd := exec.Command(args.editor, path)
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				cmd.Stdin = os.Stdin
-				cmd.Run()
-			}
+				return cmd.Run()
+			})
+		} else {
+			return search.Iter(func(path string) error {
+				cli.Print(path)
+				return nil
+			})
 		}
 	}
-	return nil
+
+	/*
+		if args.edit {
+			_, err := exec.LookPath(args.editor)
+			if err != nil {
+				return errors.New("editor not found: " + args.editor)
+			}
+		}
+
+		cmdArgs := []string{"--color", "never", "--files-with-matches"}
+
+		if args.filename != "" {
+			cmdArgs = append(cmdArgs, "-g", args.filename)
+
+			if len(args.args) == 0 {
+				cmdArgs = append(cmdArgs, "--files")
+			}
+		}
+
+		if len(args.args) > 0 {
+			cmdArgs = append(cmdArgs, args.args...)
+		}
+
+		rx := &regexp.Regexp{}
+		if args.repo != "" {
+			rx = regexp.MustCompile(args.repo)
+		}
+
+		for _, repo := range data.Repos {
+			if args.category != "" && repo.Category.String() != args.category {
+				continue
+			}
+
+			if args.repo != "" {
+				if !rx.MatchString(repo.Url) {
+					continue
+				}
+			}
+			userName, repoName := repo.split()
+			p := filepath.Join(args.root, userName, repoName)
+			a := cmdArgs[:]
+			a = append(a, p)
+			cmd := exec.Command(rg, a...)
+			if !args.edit {
+				cmd.Stdout = os.Stdout
+			}
+			// cmd.Stderr = os.Stderr
+			cmd.Env = os.Environ()
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+args.root)
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+filepath.Join(args.root, "extism", "extism"))
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
+			cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(args.root, ".bin"))
+			if !args.edit {
+				if err := cmd.Run(); err != nil {
+					cli.Log("rg returned non-zero exit code in", p+":", err)
+				}
+			} else {
+				output, err := cmd.Output()
+				if err != nil {
+					cli.Log("rg returned non-zero exit code in", p+":", err)
+					continue
+				}
+
+				lines := strings.Split(string(output), "\n")
+				for _, line := range lines {
+					if len(line) == 0 {
+						continue
+					}
+					cli.Print(line)
+					cmd := exec.Command(args.editor, line)
+					cmd.Stdout = os.Stdout
+					cmd.Stderr = os.Stderr
+					cmd.Stdin = os.Stdin
+					cmd.Run()
+				}
+			}
+		}
+		return nil*/
 }
 
 type devAddArgs struct {
@@ -351,6 +383,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devFind.Flags().StringVarP(&findArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devFind.Flags().StringVarP(&findArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
 	devFind.Flags().StringVar(&findArgs.filename, "filename", "", "Filter for filenames")
+	devFind.Flags().StringVar(&findArgs.replace, "replace", "", "Replacement string")
 	devFind.Flags().StringVar(&findArgs.editor, "editor", defaultEditor, "Editor command")
 	devFind.Flags().BoolVar(&findArgs.edit, "edit", false, "Edit matching files")
 	dev.AddCommand(devFind)
