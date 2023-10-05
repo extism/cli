@@ -111,12 +111,11 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 
 type devFindArgs struct {
 	devArgs
-	category     string
-	onlyFilename bool
-	filename     string
-	edit         bool
-	editor       string
-	repo         string
+	category string
+	filename string
+	edit     bool
+	editor   string
+	repo     string
 }
 
 func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
@@ -137,12 +136,14 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 	if args.filename != "" {
 		cmdArgs = append(cmdArgs, "-g", args.filename)
 
-		if args.onlyFilename {
+		if len(args.args) == 0 {
 			cmdArgs = append(cmdArgs, "--files")
 		}
 	}
 
-	cmdArgs = append(cmdArgs, args.args[0])
+	if len(args.args) > 0 {
+		cmdArgs = append(cmdArgs, args.args...)
+	}
 
 	data, err := args.loadDataFile()
 	if err != nil {
@@ -332,7 +333,6 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devFind.Flags().StringVar(&findArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devFind.Flags().StringVarP(&findArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devFind.Flags().StringVarP(&findArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
-	devFind.Flags().BoolVar(&findArgs.onlyFilename, "only-filename", false, "Only search filenames")
 	devFind.Flags().StringVar(&findArgs.filename, "filename", "", "Filter for filenames")
 	devFind.Flags().StringVar(&findArgs.editor, "editor", defaultEditor, "Editor command")
 	devFind.Flags().BoolVar(&findArgs.edit, "edit", false, "Edit matching files")
