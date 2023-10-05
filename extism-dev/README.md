@@ -20,7 +20,7 @@ go install github.com/extism/cli/extism-dev
 The first step is to initialize your `extism-dev` root path:
 
 ```shell
-extism-dev init ~/devel
+extism-dev init --root ~/devel
 ```
 
 This will download all the repos into `~/dev` using the github orginization as the namespace.

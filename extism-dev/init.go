@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 
 	"github.com/extism/cli"
@@ -14,6 +15,9 @@ type devInitArgs struct {
 }
 
 func runDevInit(cmd *cobra.Command, args *devInitArgs) error {
+	if Root == "" {
+		return errors.New("No root set, use `--root` to configure a root path")
+	}
 	data, err := args.loadDataFile()
 	if err != nil {
 		data = &extismData{
