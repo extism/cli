@@ -2,6 +2,12 @@
 
 A command-line tool for managing Extism repos
 
+## Dependencies
+
+- git
+- ripgrep
+  - `cargo install ripgrep`
+
 ## Installation
 
 ```shell
@@ -21,4 +27,12 @@ extism-dev init ~/devel
 This will download all the repos into `~/dev` using the github orginization as the namespace.
 For example, `git@github.com:extism/extism` will be downloaded into `~/dev/extism/extism`
 
-### 
+### Exec
+
+Once the environment is setup, you can use `extism-dev exec` to run commands in every repo
+
+```shell
+extism-dev exec pwd
+```
+
+This will print the path of each command
