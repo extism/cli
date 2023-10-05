@@ -349,7 +349,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	// Init
 	initArgs := &devInitArgs{}
 	devInit := &cobra.Command{
-		Use:          "init dev_root",
+		Use:          "init [flags] dev_root",
 		Short:        "Initialize dev repos",
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevInit, initArgs),
