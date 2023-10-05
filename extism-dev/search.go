@@ -17,9 +17,11 @@ type Search struct {
 	paths           []string
 	rx              *regexp.Regexp
 	filterFilenames *regexp.Regexp
+	prompt          []string
+	args            *devFindArgs
 }
 
-func NewSearch(query string, paths ...string) *Search {
+func NewSearch(args *devFindArgs, query string, paths ...string) *Search {
 	var rx *regexp.Regexp
 	if query != "" {
 		rx = regexp.MustCompile(query)
@@ -28,6 +30,7 @@ func NewSearch(query string, paths ...string) *Search {
 		paths:           paths,
 		rx:              rx,
 		filterFilenames: nil,
+		args:            args,
 	}
 }
 
@@ -90,6 +93,11 @@ func (search *Search) Replace(r string) error {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
+			if len(search.prompt) > 0 {
+				if !search.args.prompt("Edit", path) {
+					return
+				}
+			}
 			ignore, err := gitignore.FromGit()
 			if err != nil {
 				ignore, _ = gitignore.New()

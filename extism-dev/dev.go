@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,12 +112,30 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 
 type devFindArgs struct {
 	devArgs
-	category string
-	filename string
-	edit     bool
-	editor   string
-	repo     string
-	replace  string
+	category    string
+	filename    string
+	edit        bool
+	editor      string
+	repo        string
+	replace     string
+	interactive bool
+}
+
+func (a *devFindArgs) prompt(msg ...any) bool {
+	if !a.interactive {
+		return true
+	}
+
+	fmt.Print(msg...)
+	fmt.Print("? [y/n] ")
+
+	c := 'n'
+	_, err := fmt.Scanf("%c\n", &c)
+	if err != nil {
+		cli.Log("prompt failed:", err)
+		return false
+	}
+	return c == 'y'
 }
 
 func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
@@ -124,7 +143,6 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 	if err != nil {
 		return err
 	}
-
 	query := ""
 	if len(args.args) > 0 {
 		query = args.args[0]
@@ -149,7 +167,7 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 		}
 	}
 
-	search := NewSearch(query, dirs...)
+	search := NewSearch(args, query, dirs...)
 	if args.filename != "" {
 		search.FilterFilenames(args.filename)
 	}
@@ -162,6 +180,9 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 			return search.Iter(func(path string) error {
 				lock.Lock()
 				defer lock.Unlock()
+				if !args.prompt("Edit", path) {
+					return nil
+				}
 				cli.Print("Editing", path)
 				cmd := exec.Command(args.editor, path)
 				cmd.Stdout = os.Stdout
@@ -177,84 +198,6 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 		}
 	}
 
-	/*
-		if args.edit {
-			_, err := exec.LookPath(args.editor)
-			if err != nil {
-				return errors.New("editor not found: " + args.editor)
-			}
-		}
-
-		cmdArgs := []string{"--color", "never", "--files-with-matches"}
-
-		if args.filename != "" {
-			cmdArgs = append(cmdArgs, "-g", args.filename)
-
-			if len(args.args) == 0 {
-				cmdArgs = append(cmdArgs, "--files")
-			}
-		}
-
-		if len(args.args) > 0 {
-			cmdArgs = append(cmdArgs, args.args...)
-		}
-
-		rx := &regexp.Regexp{}
-		if args.repo != "" {
-			rx = regexp.MustCompile(args.repo)
-		}
-
-		for _, repo := range data.Repos {
-			if args.category != "" && repo.Category.String() != args.category {
-				continue
-			}
-
-			if args.repo != "" {
-				if !rx.MatchString(repo.Url) {
-					continue
-				}
-			}
-			userName, repoName := repo.split()
-			p := filepath.Join(args.root, userName, repoName)
-			a := cmdArgs[:]
-			a = append(a, p)
-			cmd := exec.Command(rg, a...)
-			if !args.edit {
-				cmd.Stdout = os.Stdout
-			}
-			// cmd.Stderr = os.Stderr
-			cmd.Env = os.Environ()
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+args.root)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+filepath.Join(args.root, "extism", "extism"))
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
-			cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(args.root, ".bin"))
-			if !args.edit {
-				if err := cmd.Run(); err != nil {
-					cli.Log("rg returned non-zero exit code in", p+":", err)
-				}
-			} else {
-				output, err := cmd.Output()
-				if err != nil {
-					cli.Log("rg returned non-zero exit code in", p+":", err)
-					continue
-				}
-
-				lines := strings.Split(string(output), "\n")
-				for _, line := range lines {
-					if len(line) == 0 {
-						continue
-					}
-					cli.Print(line)
-					cmd := exec.Command(args.editor, line)
-					cmd.Stdout = os.Stdout
-					cmd.Stderr = os.Stderr
-					cmd.Stdin = os.Stdin
-					cmd.Run()
-				}
-			}
-		}
-		return nil*/
 }
 
 type devAddArgs struct {
@@ -386,6 +329,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devFind.Flags().StringVar(&findArgs.replace, "replace", "", "Replacement string")
 	devFind.Flags().StringVar(&findArgs.editor, "editor", defaultEditor, "Editor command")
 	devFind.Flags().BoolVar(&findArgs.edit, "edit", false, "Edit matching files")
+	devFind.Flags().BoolVarP(&findArgs.interactive, "interactive", "i", false, "Prompt before editing or replacing")
 	dev.AddCommand(devFind)
 
 	// Add
