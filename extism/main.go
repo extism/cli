@@ -29,7 +29,6 @@ func rootCmd() *cobra.Command {
 		"Github access token, can also be set using the $GITHUB_TOKEN env variable")
 	cmd.AddCommand(cli.CallCmd())
 	cmd.AddCommand(cli.LibCmd())
-	cmd.AddCommand(cli.DevCmd())
 	return cmd
 }
 

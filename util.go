@@ -16,7 +16,7 @@ type Args interface {
 	SetArgs(args []string)
 }
 
-func runArgs[T Args](f func(cmd *cobra.Command, args T) error, call T) func(cmd *cobra.Command, args []string) error {
+func RunArgs[T Args](f func(cmd *cobra.Command, args T) error, call T) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error { call.SetArgs(args); return f(cmd, call) }
 }
 

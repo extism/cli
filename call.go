@@ -222,10 +222,11 @@ func CallCmd() *cobra.Command {
 	call := &callArgs{}
 	cmd :=
 		&cobra.Command{
-			Use:          "call",
+			Use:          "call [flags] wasm_file function",
 			Short:        "Call a plugin function",
 			SilenceUsage: true,
-			RunE:         runArgs(runCall, call),
+			RunE:         RunArgs(runCall, call),
+			Args:         cobra.ExactArgs(2),
 		}
 	flags := cmd.Flags()
 	flags.StringVarP(&call.input, "input", "i", "", "Input data")
