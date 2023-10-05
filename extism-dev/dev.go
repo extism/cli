@@ -95,6 +95,7 @@ func runDevEach(cmd *cobra.Command, each *devEachArgs) error {
 		cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+filepath.Join(each.root, "extism", "extism"))
 		cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
 		cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
+		cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+filepath.Join(each.root, ".bin"))
 		if err := cmd.Run(); err != nil {
 			cli.Print("ERROR: command failed in", p)
 		}
