@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -83,6 +84,7 @@ func runDevEach(cmd *cobra.Command, each *devEachArgs) error {
 		userName, repoName := repo.split()
 		p := filepath.Join(each.root, userName, repoName)
 		cli.Log("Executing", each.args[0], "in", p, "using", each.shell)
+		cli.Print()
 		cli.Print(p)
 		cmd := exec.Command(each.shell, "-c", each.args[0])
 		cmd.Dir = p
@@ -140,7 +142,7 @@ func runDevRemove(cmd *cobra.Command, args *devRemoveArgs) error {
 
 	out := []repo{}
 	for _, s := range data.Repos {
-		if s.Url != args.url {
+		if strings.HasSuffix(s.Url, args.url) {
 			out = append(out, s)
 		}
 	}
@@ -200,7 +202,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 		Args:         cobra.ExactArgs(1),
 	}
 	devEach.Flags().StringVar(&eachArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
-	devEach.Flags().StringVarP(&eachArgs.category, "category", "c", "", "Category: sdk, pdk, runtime or other")
+	devEach.Flags().StringVarP(&eachArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devEach.Flags().StringVarP(&eachArgs.filter, "filter", "f", "", "Regex filter used on the repo name")
 	devEach.Flags().StringVarP(&eachArgs.shell, "shell", "s", "bash", "Shell to use when executing commands")
 	dev.AddCommand(devEach)
@@ -217,7 +219,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devAdd.Flags().StringVar(&addArgs.root, "root", defaultRoot, "Root of extism development repos, all packages will be cloned into directories matching their github URLs inside this directory")
 	devAdd.Flags().StringVarP(&addArgs.url, "url", "u", "", "Repository URL, for example git@github.com:extism/extism")
 	devAdd.MarkFlagRequired("url")
-	devAdd.Flags().StringVarP(&addArgs.category, "category", "c", "other", "Category: sdk, pdk, runtime or other")
+	devAdd.Flags().StringVarP(&addArgs.category, "category", "c", "other", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devAdd)
 
 	// Remove

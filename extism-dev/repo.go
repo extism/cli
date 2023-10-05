@@ -20,6 +20,7 @@ const (
 	Runtime = iota
 	SDK
 	PDK
+	Plugin
 	Other
 )
 
@@ -31,6 +32,8 @@ func (s repoCategory) String() string {
 		return "sdk"
 	case PDK:
 		return "pdk"
+	case Plugin:
+		return "plugin"
 	default:
 		return "other"
 	}
@@ -43,6 +46,8 @@ func (s *repoCategory) Parse(cat string) {
 		*s = SDK
 	} else if cat == "pdk" {
 		*s = PDK
+	} else if cat == "plugin" {
+		*s = Plugin
 	} else {
 		*s = Other
 	}

@@ -78,5 +78,13 @@
     {
         "url": "git@github.com:extism/extism-dbg",
         "category": "other"
+    },
+    {
+        "url": "git@github.com:extism/plugins",
+        "category": "plugin"
+    },
+    {
+        "url": "git@github.com:extism/hello-from",
+        "category": "plugin"
     }
 ]
