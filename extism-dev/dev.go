@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 
@@ -50,11 +51,10 @@ func SetupDevCmd(dev *cobra.Command) error {
 		Short:        "Initialize dev repos",
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevInit, initArgs),
-		Args:         cobra.NoArgs,
 	}
 	devInit.Flags().IntVarP(&initArgs.parallel, "parallel", "p", 4, "Number of repos to download in parallel")
 	devInit.Flags().BoolVar(&initArgs.local, "local", false, "Do not set as global extism-dev path")
-	devInit.MarkPersistentFlagRequired("root")
+	devInit.Flags().StringVarP(&initArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devInit)
 
 	// Exec
@@ -135,6 +135,55 @@ func SetupDevCmd(dev *cobra.Command) error {
 	}
 	dev.AddCommand(devPath)
 
+	// Clean
+	devClean := &cobra.Command{
+		Use:          "clean",
+		Short:        "Cleanup files created by extism-dev, this will not remove the repos",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			link := filepath.Join(homeDir(), ".extism.dev")
+			path, err := os.Readlink(link)
+			if err != nil {
+				if os.IsNotExist(err) {
+					cli.Print(link, "not found, skipping")
+					return nil
+				}
+				return err
+			}
+			Root = path
+
+			dataFile := filepath.Join(path, ".extism.dev.json")
+			f, err := os.Open(dataFile)
+			if err != nil {
+				cli.Print(dataFile, "is not found, skipping")
+				return nil
+			}
+			defer f.Close()
+
+			var out extismData
+			if err := json.NewDecoder(f).Decode(&out); err != nil {
+				cli.Print(dataFile, "is not the proper format, skipping")
+
+			} else {
+				cli.Print("Removing", dataFile)
+				err = os.Remove(dataFile)
+				if err != nil {
+					cli.Print("Failed to remove", dataFile)
+				}
+			}
+
+			cli.Print("Removing", link)
+
+			c := "rm -rf"
+			for _, repo := range out.Repos {
+				c += " " + repo.path()
+			}
+			defer cli.Print("Note: the repositories are not automatically removed, this could be done with the following command:\n\n", c)
+			return os.Remove(link)
+		},
+	}
+	dev.AddCommand(devClean)
+
 	// List
 	listArgs := &devListArgs{}
 	devList := &cobra.Command{
@@ -155,6 +204,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 		RunE:         cli.RunArgs(runDevUpdate, updateArgs),
 	}
 	devUpdate.Flags().BoolVar(&updateArgs.kernel, "kernel", false, "Update kernel files across repos")
+	devUpdate.Flags().BoolVar(&updateArgs.all, "all", false, "Enable all updates")
 	dev.AddCommand(devUpdate)
 
 	return nil

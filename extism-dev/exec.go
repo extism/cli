@@ -55,8 +55,8 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 			cmd.Env = os.Environ()
 			cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+Root)
 			cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+args.Path("extism", "extism"))
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO="+repo.Url)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_CATEGORY"+repo.Category.String())
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO_URL="+repo.Url)
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO_CATEGORY"+repo.Category.String())
 			cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+args.Path(".bin"))
 			if err := cmd.Run(); err != nil {
 				cli.Print("Error: command failed in", p)

@@ -11,6 +11,7 @@ import (
 type devUpdateArgs struct {
 	devArgs
 	kernel bool
+	all    bool
 }
 
 func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
@@ -33,7 +34,7 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 	search.Iter(func(name string) error {
 		fname := filepath.Base(name)
 
-		if args.kernel {
+		if args.all || args.kernel {
 			if fname == "extism-runtime.wasm" && name != kernelPath {
 				cli.Print("Updating", name)
 				err := ioutil.WriteFile(name, kernelData, 0o655)

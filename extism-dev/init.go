@@ -12,6 +12,7 @@ type devInitArgs struct {
 	devArgs
 	parallel int
 	local    bool
+	category string
 }
 
 func runDevInit(cmd *cobra.Command, args *devInitArgs) error {
@@ -24,7 +25,11 @@ func runDevInit(cmd *cobra.Command, args *devInitArgs) error {
 			Repos: defaultRepos,
 		}
 	} else {
-		args.mergeRepos(data)
+		data.mergeRepos()
+	}
+
+	if args.category != "" {
+		data.filterRepos(args.category)
 	}
 
 	cli.Print("Initializing Extism dev repos in", Root)

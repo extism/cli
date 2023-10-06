@@ -59,7 +59,19 @@ func (a devArgs) link() error {
 	return os.Symlink(abs, dest)
 }
 
-func (args *devArgs) mergeRepos(data *extismData) {
+func (data *extismData) filterRepos(category string) {
+	repos := []repo{}
+
+	for _, r := range data.Repos {
+		if r.Category.String() == category {
+			repos = append(repos, r)
+		}
+	}
+
+	data.Repos = repos
+}
+
+func (data *extismData) mergeRepos() {
 	m := map[string]repo{}
 	for _, r := range defaultRepos {
 		m[r.Url] = r
