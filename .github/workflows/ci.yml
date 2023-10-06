@@ -57,6 +57,13 @@ jobs:
         run: |
           echo "this is a test" | extism call test/code.wasm count_vowels --stdin     
   go_tests:
+    name: Go tests (CLI+dev)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        rust:
+          - stable
     steps:
       - uses: actions/checkout@v3
       
