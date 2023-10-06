@@ -188,7 +188,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	listArgs := &devListArgs{}
 	devList := &cobra.Command{
 		Use:          "list",
-		Short:        "List repos and their paths",
+		Short:        "List paths to repos on disk",
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevList, listArgs),
 	}

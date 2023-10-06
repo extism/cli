@@ -20,7 +20,7 @@ func runDevList(cmd *cobra.Command, args *devListArgs) error {
 		if args.category != "" && repo.Category.String() != args.category {
 			continue
 		}
-		cli.Print(repo.Url, "\t", repo.path())
+		cli.Print(repo.path())
 	}
 	return nil
 }
