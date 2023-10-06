@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/extism/cli"
-	"github.com/iriri/minimal/gitignore"
 )
 
 type Search struct {
@@ -48,9 +47,9 @@ func (search *Search) Iter(f func(string) error) error {
 		wg.Add(1)
 		go func(path string) {
 			defer wg.Done()
-			ignore, err := gitignore.FromGit()
+			ignore, err := FromGit(path)
 			if err != nil {
-				ignore, _ = gitignore.New()
+				ignore, _ = New()
 			}
 			err = ignore.Walk(path, func(path string, entry fs.FileInfo, err error) error {
 				if entry.IsDir() || !entry.Mode().IsRegular() {
@@ -92,9 +91,9 @@ func (search *Search) Iter(f func(string) error) error {
 
 func (search *Search) Replace(r string) error {
 	f := func(path string) {
-		ignore, err := gitignore.FromGit()
+		ignore, err := FromGit(path)
 		if err != nil {
-			ignore, _ = gitignore.New()
+			ignore, _ = New()
 		}
 		ignore.Walk(path, func(path string, entry fs.FileInfo, err error) error {
 			if entry.IsDir() || !entry.Mode().IsRegular() {
@@ -128,13 +127,6 @@ func (search *Search) Replace(r string) error {
 
 			return nil
 		})
-	}
-
-	if search.args.interactive {
-		for _, r := range search.repos {
-			f(r.path())
-		}
-		return nil
 	}
 
 	wg := sync.WaitGroup{}

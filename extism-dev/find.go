@@ -22,10 +22,16 @@ type devFindArgs struct {
 	interactive bool
 }
 
+var promptLock = sync.Mutex{}
+var editLock = sync.Mutex{}
+
 func (a *devFindArgs) prompt(msg ...any) bool {
 	if !a.interactive {
 		return true
 	}
+
+	promptLock.Lock()
+	defer promptLock.Unlock()
 
 	fmt.Print(msg...)
 	fmt.Print("? [y/n] ")
@@ -75,10 +81,9 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 		return search.Replace(args.replace)
 	} else {
 		if args.edit {
-			lock := sync.Mutex{}
 			return search.Iter(func(path string) error {
-				lock.Lock()
-				defer lock.Unlock()
+				editLock.Lock()
+				defer editLock.Unlock()
 				if !args.prompt("Edit ", path) {
 					return nil
 				}
