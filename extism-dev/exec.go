@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -31,7 +32,7 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 	pool := NewPool(args.parallel)
 	for i, r := range data.Repos {
 		RunTask(pool, func(repo repo) {
-			if args.category != "" && repo.Category.String() != args.category {
+			if args.category != "" && repo.Category != args.category {
 				return
 			}
 
@@ -48,7 +49,8 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 				}
 				cli.Print(p)
 			}
-			cmd := exec.Command(args.shell, "-c", args.args[0])
+			a := strings.Join(args.args, " ")
+			cmd := exec.Command(args.shell, "-c", a)
 			cmd.Dir = p
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
@@ -56,7 +58,7 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 			cmd.Env = append(cmd.Env, "EXTISM_DEV_ROOT="+Root)
 			cmd.Env = append(cmd.Env, "EXTISM_DEV_RUNTIME="+args.Path("extism", "extism"))
 			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO_URL="+repo.Url)
-			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO_CATEGORY"+repo.Category.String())
+			cmd.Env = append(cmd.Env, "EXTISM_DEV_REPO_CATEGORY"+repo.Category)
 			cmd.Env = append(cmd.Env, "PATH="+os.Getenv("PATH")+":"+args.Path(".bin"))
 			if err := cmd.Run(); err != nil {
 				cli.Print("Error: command failed in", p)

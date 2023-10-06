@@ -63,7 +63,7 @@ func (data *extismData) filterRepos(category string) {
 	repos := []repo{}
 
 	for _, r := range data.Repos {
-		if r.Category.String() == category {
+		if r.Category == category {
 			repos = append(repos, r)
 		}
 	}

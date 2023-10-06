@@ -61,7 +61,7 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 				continue
 			}
 		}
-		if args.category == "" || repo.Category.String() == args.category {
+		if args.category == "" || repo.Category == args.category {
 			repos = append(repos, repo)
 		}
 	}

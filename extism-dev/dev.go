@@ -64,7 +64,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 		Short:        "Run a command in each repo",
 		SilenceUsage: true,
 		RunE:         cli.RunArgs(runDevExec, execArgs),
-		Args:         cobra.ExactArgs(1),
+		Args:         cobra.MinimumNArgs(1),
 	}
 
 	defaultShell := os.Getenv("SHELL")

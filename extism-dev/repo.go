@@ -14,60 +14,9 @@ import (
 //go:embed repos.json
 var repos []byte
 
-type repoCategory int
-
-const (
-	Runtime = iota
-	SDK
-	PDK
-	Plugin
-	Other
-)
-
-func (s repoCategory) String() string {
-	switch s {
-	case Runtime:
-		return "runtime"
-	case SDK:
-		return "sdk"
-	case PDK:
-		return "pdk"
-	case Plugin:
-		return "plugin"
-	default:
-		return "other"
-	}
-}
-
-func (s *repoCategory) Parse(cat string) {
-	if cat == "runtime" {
-		*s = Runtime
-	} else if cat == "sdk" {
-		*s = SDK
-	} else if cat == "pdk" {
-		*s = PDK
-	} else if cat == "plugin" {
-		*s = Plugin
-	} else {
-		*s = Other
-	}
-}
-func (s repoCategory) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
-}
-
-func (s *repoCategory) UnmarshalJSON(data []byte) (err error) {
-	var cat string
-	if err := json.Unmarshal(data, &cat); err != nil {
-		return err
-	}
-	s.Parse(cat)
-	return nil
-}
-
 type repo struct {
-	Url      string       `json:"url"`
-	Category repoCategory `json:"category"`
+	Url      string `json:"url"`
+	Category string `json:"category"`
 }
 
 func (r repo) path() string {

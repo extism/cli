@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -22,9 +23,9 @@ func runDevAdd(cmd *cobra.Command, args *devAddArgs) error {
 	}
 
 	r := repo{
-		Url: args.url,
+		Url:      args.url,
+		Category: strings.ToLower(args.category),
 	}
-	r.Category.Parse(args.category)
 	if !r.clone() {
 		return errors.New(fmt.Sprint("Unable to clone repo:", r.Url))
 	}

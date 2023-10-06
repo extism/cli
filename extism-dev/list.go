@@ -17,7 +17,7 @@ func runDevList(cmd *cobra.Command, args *devListArgs) error {
 	}
 
 	for _, repo := range data.Repos {
-		if args.category != "" && repo.Category.String() != args.category {
+		if args.category != "" && repo.Category != args.category {
 			continue
 		}
 		cli.Print(repo.path())
