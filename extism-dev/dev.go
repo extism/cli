@@ -77,6 +77,22 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devExec.Flags().IntVarP(&execArgs.parallel, "parallel", "p", 1, "Number of commands to execute in parallel")
 	dev.AddCommand(devExec)
 
+	// Call
+	callArgs := &devCallArgs{}
+	devCall := &cobra.Command{
+		Use:          "call [flags] plugin function",
+		Short:        "Run an Extism plugin in each repo, each plugin will receive the repo URL as input",
+		SilenceUsage: true,
+		RunE:         cli.RunArgs(runDevCall, callArgs),
+		Args:         cobra.ExactArgs(2),
+	}
+
+	devCall.Flags().StringVarP(&execArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
+	devCall.Flags().StringVarP(&execArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
+	devCall.Flags().IntVar(&callArgs.timeout, "timeout", 0, "Plugin timeout in milliseconds")
+	devCall.Flags().IntVarP(&callArgs.parallel, "parallel", "p", 1, "Number of commands to execute in parallel")
+	dev.AddCommand(devCall)
+
 	// Find
 	findArgs := &devFindArgs{}
 	devFind := &cobra.Command{
