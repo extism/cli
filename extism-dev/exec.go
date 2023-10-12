@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strings"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -14,7 +13,6 @@ type devExecArgs struct {
 	devArgs
 	category string
 	repo     string
-	shell    string
 	parallel int
 }
 
@@ -42,15 +40,14 @@ func runDevExec(cmd *cobra.Command, args *devExecArgs) error {
 				}
 			}
 			p := repo.path()
-			cli.Log("Executing", args.args[0], "in", p, "using", args.shell)
+			cli.Log("Executing", args.args[0], "in", p)
 			if args.parallel <= 1 {
 				if i > 0 {
 					cli.Print()
 				}
 				cli.Print(p)
 			}
-			a := strings.Join(args.args, " ")
-			cmd := exec.Command(args.shell, "-c", a)
+			cmd := exec.Command(args.args[0], args.args[1:]...)
 			cmd.Dir = p
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

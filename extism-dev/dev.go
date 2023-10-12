@@ -67,13 +67,8 @@ func SetupDevCmd(dev *cobra.Command) error {
 		Args:         cobra.MinimumNArgs(1),
 	}
 
-	defaultShell := os.Getenv("SHELL")
-	if defaultShell == "" {
-		defaultShell = "sh"
-	}
 	devExec.Flags().StringVarP(&execArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	devExec.Flags().StringVarP(&execArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
-	devExec.Flags().StringVarP(&execArgs.shell, "shell", "s", defaultShell, "Shell to use when executing commands")
 	devExec.Flags().IntVarP(&execArgs.parallel, "parallel", "p", 1, "Number of commands to execute in parallel")
 	dev.AddCommand(devExec)
 
