@@ -275,7 +275,7 @@ func LibCmd() *cobra.Command {
 		Use:          "install",
 		Short:        "Install libextism",
 		SilenceUsage: true,
-		RunE:         runArgs(runLibInstall, installArgs),
+		RunE:         RunArgs(runLibInstall, installArgs),
 	}
 	libInstall.Flags().StringVar(&installArgs.version, "version", "",
 		"Install a specified Extism version, `git` or `latest` can be used to specify the latest from git and no version will default to the most recent release")
@@ -293,7 +293,7 @@ func LibCmd() *cobra.Command {
 		Use:          "uninstall",
 		Short:        "Uninstall libextism",
 		SilenceUsage: true,
-		RunE:         runArgs(runLibUninstall, uninstallArgs),
+		RunE:         RunArgs(runLibUninstall, uninstallArgs),
 	}
 	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local",
 		"Prefix for existing libextism installation")
