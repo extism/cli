@@ -45,11 +45,17 @@ updated using `extism-dev add` and `extism-dev remove`.
 
 ### Exec
 
-Once the environment is setup, you can use `extism-dev exec` to run commands in every repo. For example, 
-to list every open PR using 'gh':
+Once the environment is setup, you can use `extism-dev exec` to run commands in every repo.
+
+For example, to list every open PR using 'gh':
 
 ```shell
-extism-dev exec 'gh pr list'
+extism-dev exec -- gh pr list
+```
+The `--repo` flag can be used to select a specific repo, or set of repos:
+
+```shell
+extism-dev exec --repo 'go-sdk|js-sdk' -- gh pr list
 ```
 
 The following environment variables are available when using `exec`:
@@ -69,8 +75,15 @@ Search for files that contain `base64`:
 extism-dev find base64
 ```
 
+Search for files that contain `base64` in `extism/extism`:
+
+```shell
+extism-dev find --repo 'extism/extism' base64
+```
+
 To replace the version of the "base64" crate in every `Cargo.toml` file:
 
 ```shell
 extism-dev find --filename 'Cargo.toml' 'base64 = ".*"' --replace 'base64 = "1.0.0"'
 ```
+
