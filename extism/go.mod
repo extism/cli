@@ -1,6 +1,6 @@
 module github.com/extism/cli/extism
 
-go 1.21.1
+go 1.20
 
 replace github.com/extism/cli => ../
 
