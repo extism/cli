@@ -10,7 +10,7 @@ A command-line tool for managing Extism repos
 ## Installation
 
 ```shell
-go install github.com/extism/cli/extism-dev
+go install github.com/extism/cli/extism-dev@latest
 ```
 
 ## Usage
