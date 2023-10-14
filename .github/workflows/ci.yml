@@ -75,8 +75,10 @@ jobs:
     
       - name: Test CLI
         run: |
-          go test -v ./extism
+          cd extism
+          go test -v -race
         
       - name: Test dev
         run: |
-          go test -v ./extism-dev
+          cd extism-dev
+          go test -v -race
