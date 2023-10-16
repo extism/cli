@@ -19,6 +19,7 @@ type devFindArgs struct {
 	editor      string
 	repo        string
 	replace     string
+	dryRun      bool
 	interactive bool
 }
 
@@ -84,6 +85,10 @@ func runDevFind(cmd *cobra.Command, args *devFindArgs) error {
 			return search.Iter(func(path string) error {
 				editLock.Lock()
 				defer editLock.Unlock()
+				if args.dryRun {
+					cli.Print("Edit", path)
+					return nil
+				}
 				if !args.prompt("Edit ", path) {
 					return nil
 				}

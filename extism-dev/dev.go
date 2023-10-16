@@ -107,6 +107,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devFind.Flags().StringVar(&findArgs.editor, "editor", defaultEditor, "Editor command")
 	devFind.Flags().BoolVar(&findArgs.edit, "edit", false, "Edit matching files")
 	devFind.Flags().BoolVarP(&findArgs.interactive, "interactive", "i", false, "Prompt before editing or replacing")
+	devFind.Flags().BoolVar(&findArgs.dryRun, "dry-run", false, "Don't actually write any files when --replace or --edit are passed")
 	dev.AddCommand(devFind)
 
 	// Add
@@ -215,7 +216,11 @@ func SetupDevCmd(dev *cobra.Command) error {
 		RunE:         cli.RunArgs(runDevUpdate, updateArgs),
 	}
 	devUpdate.Flags().BoolVar(&updateArgs.kernel, "kernel", false, "Update kernel files across repos")
+	devUpdate.Flags().BoolVar(&updateArgs.wasm, "wasm", false, "Update test wasm files across repos")
 	devUpdate.Flags().BoolVar(&updateArgs.all, "all", false, "Enable all updates")
+	devUpdate.Flags().BoolVar(&updateArgs.dryRun, "dry-run", false, "Don't actually write any files")
+	devUpdate.Flags().StringVarP(&updateArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
+	devUpdate.Flags().StringVarP(&updateArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devUpdate)
 
 	return nil

@@ -121,8 +121,12 @@ func (search *Search) Replace(r string) error {
 					return nil
 				}
 				cli.Print("Updating", abs)
-				data := search.rx.ReplaceAll(data, []byte(r))
-				return ioutil.WriteFile(abs, data, entry.Mode().Perm())
+				if search.args.dryRun {
+					return nil
+				} else {
+					data := search.rx.ReplaceAll(data, []byte(r))
+					return ioutil.WriteFile(abs, data, entry.Mode().Perm())
+				}
 			}
 
 			return nil
