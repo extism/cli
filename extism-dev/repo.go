@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "embed"
-	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,9 +8,6 @@ import (
 
 	"github.com/extism/cli"
 )
-
-//go:embed repos.json
-var repos []byte
 
 type repo struct {
 	Url      string `json:"url"`
@@ -54,12 +49,4 @@ func (repo repo) clone() bool {
 	}
 
 	return false
-}
-
-var defaultRepos []repo
-
-func init() {
-	if err := json.Unmarshal(repos, &defaultRepos); err != nil {
-		panic(err)
-	}
 }

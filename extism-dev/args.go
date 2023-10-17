@@ -94,6 +94,19 @@ func (data *extismData) mergeRepos() {
 	})
 }
 
+func (data *extismData) mergeExtraWasm() {
+	m := map[string]string{}
+	for k, v := range defaultTestWasm {
+		m[k] = v
+	}
+
+	for k, v := range data.TestWasm {
+		m[k] = v
+	}
+
+	data.TestWasm = m
+}
+
 func (a *devArgs) SetArgs(args []string) {
 	a.args = args
 }
