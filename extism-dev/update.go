@@ -113,7 +113,7 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 	}
 	sources := map[string]wasmSource{}
 
-	for k, v := range dataFile.ExtraWasm {
+	for k, v := range dataFile.TestWasm {
 		sources[k] = wasmSource{path: args.Path(v)}
 	}
 

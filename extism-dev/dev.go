@@ -13,15 +13,15 @@ import (
 //go:embed repos.json
 var repos []byte
 
-//go:embed extraWasm.json
-var extraWasm []byte
+//go:embed testWasm.json
+var testWasm []byte
 
 var defaultRepos []repo
-var defaultExtraWasm map[string]string
+var defaultTestWasm map[string]string
 
 type extismData struct {
-	Repos     []repo            `json:"repos"`
-	ExtraWasm map[string]string `json:"extraWasm,omitempty"`
+	Repos    []repo            `json:"repos"`
+	TestWasm map[string]string `json:"testWasm,omitempty"`
 }
 
 func init() {
@@ -29,7 +29,7 @@ func init() {
 		panic(err)
 	}
 
-	if err := json.Unmarshal(extraWasm, &defaultExtraWasm); err != nil {
+	if err := json.Unmarshal(testWasm, &defaultTestWasm); err != nil {
 		panic(err)
 	}
 }
