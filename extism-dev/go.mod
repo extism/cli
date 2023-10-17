@@ -2,7 +2,7 @@ module github.com/extism/cli/extism-dev
 
 go 1.20
 
-replace github.com/extism/cli => ../
+// replace github.com/extism/cli => ../
 
 require (
 	github.com/extism/cli v0.3.0
