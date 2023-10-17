@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 
@@ -18,10 +19,12 @@ type devUpdateArgs struct {
 	dryRun   bool
 	repo     string
 	category string
+	build    bool
 }
 
 type wasmSource struct {
 	path string
+	mode os.FileMode
 	data []byte
 }
 
@@ -29,6 +32,11 @@ func (w *wasmSource) Get() ([]byte, error) {
 	if len(w.data) > 0 {
 		return w.data, nil
 	}
+	s, err := os.Stat(w.path)
+	if err != nil {
+		return []byte{}, err
+	}
+	w.mode = s.Mode()
 
 	d, err := ioutil.ReadFile(w.path)
 	if err != nil {
@@ -46,9 +54,40 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 	}
 
 	kernelPath := args.Path("extism", "extism", "runtime", "src", "extism-runtime.wasm")
-	kernelData, err := ioutil.ReadFile(kernelPath)
-	if err != nil {
-		return err
+	kernel := wasmSource{path: kernelPath}
+
+	if args.all || args.kernel {
+		cmd := exec.Command("bash", "build.sh")
+		cmd.Dir = args.Path("extism", "extism", "kernel")
+		cli.Print("Building extism-runtime.wasm")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			cli.Log("Error building kernel:", err)
+			cli.Print(string(output))
+			return err
+		}
+	}
+
+	if args.all || args.wasm {
+		cmd := exec.Command("make")
+		cmd.Dir = args.Path("extism", "plugins")
+		cli.Print("Building plugins in extism/plugins")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			cli.Log("Error building plugins:", err)
+			cli.Print(string(output))
+			return err
+		}
+
+		cmd = exec.Command("make")
+		cmd.Dir = args.Path("extism", "c-pdk")
+		cli.Print("Building plugins in extism/c-pdk")
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			cli.Log("Error building c-pdk plugins:", err)
+			cli.Print(string(output))
+			return err
+		}
 	}
 
 	repos := []repo{}
@@ -66,7 +105,17 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 		repos = append(repos, repo)
 	}
 
+	// Get configured extra wasm files
+	dataFile, err := args.loadDataFile()
+	if err != nil {
+		cli.Log("Unable to load data file", err)
+		return err
+	}
 	sources := map[string]wasmSource{}
+
+	for k, v := range dataFile.ExtraWasm {
+		sources[k] = wasmSource{path: args.Path(v)}
+	}
 
 	pluginsDir := args.Path("extism", "plugins", "target", "wasm32-unknown-unknown", "release")
 
@@ -89,10 +138,6 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 		}
 	}
 
-	// A few from the C-PDK still
-	sources["code-functions.wasm"] = wasmSource{path: args.Path("extism", "c-pdk", "examples", "host-functions", "host-functions.wasm")}
-	sources["globals.wasm"] = wasmSource{path: args.Path("extism", "c-pdk", "examples", "globals", "globals.wasm")}
-
 	search := NewSearch(nil, "", repos...)
 	search.Iter(func(name string) error {
 		fname := filepath.Base(name)
@@ -102,7 +147,12 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 			if fname == "extism-runtime.wasm" && name != kernelPath {
 				cli.Print("Updating", name)
 				if !args.dryRun {
-					err := ioutil.WriteFile(name, kernelData, 0o655)
+					k, err := kernel.Get()
+					if err != nil {
+						cli.Log("Unable to load kernel", err)
+						return err
+					}
+					err = ioutil.WriteFile(name, k, 0o655)
 					if err != nil {
 						cli.Print("Error copying extism-kernel file to", name+":", err)
 					}
@@ -120,7 +170,7 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 					return err
 				}
 				if !args.dryRun {
-					err = ioutil.WriteFile(name, data, 0o655)
+					err = ioutil.WriteFile(name, data, p.mode)
 					if err != nil {
 						cli.Print("Error copying", p, "to", name+":", err)
 					}

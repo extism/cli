@@ -1,0 +1,4 @@
+{
+  "globals.wasm": "extism/c-pdk/examples/globals/globals.wasm",
+  "code-functions.wasm": "extism/c-pdk/examples/host-functions/host-functions.wasm"
+}

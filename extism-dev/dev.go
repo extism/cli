@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -9,8 +10,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//go:embed repos.json
+var repos []byte
+
+//go:embed extraWasm.json
+var extraWasm []byte
+
+var defaultRepos []repo
+var defaultExtraWasm map[string]string
+
 type extismData struct {
-	Repos []repo `json:"repos"`
+	Repos     []repo            `json:"repos"`
+	ExtraWasm map[string]string `json:"extraWasm,omitempty"`
+}
+
+func init() {
+	if err := json.Unmarshal(repos, &defaultRepos); err != nil {
+		panic(err)
+	}
+
+	if err := json.Unmarshal(extraWasm, &defaultExtraWasm); err != nil {
+		panic(err)
+	}
 }
 
 func homeDir() string {
@@ -219,6 +240,7 @@ func SetupDevCmd(dev *cobra.Command) error {
 	devUpdate.Flags().BoolVar(&updateArgs.wasm, "wasm", false, "Update test wasm files across repos")
 	devUpdate.Flags().BoolVar(&updateArgs.all, "all", false, "Enable all updates")
 	devUpdate.Flags().BoolVar(&updateArgs.dryRun, "dry-run", false, "Don't actually write any files")
+	devUpdate.Flags().BoolVarP(&updateArgs.build, "build", "b", false, "Run any necesarry build steps first")
 	devUpdate.Flags().StringVarP(&updateArgs.repo, "repo", "r", "", "Regex filter used on the repo name")
 	devUpdate.Flags().StringVarP(&updateArgs.category, "category", "c", "", "Category: sdk, pdk, plugin, runtime or other")
 	dev.AddCommand(devUpdate)

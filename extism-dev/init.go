@@ -26,6 +26,7 @@ func runDevInit(cmd *cobra.Command, args *devInitArgs) error {
 		}
 	} else {
 		data.mergeRepos()
+		data.mergeExtraWasm()
 	}
 
 	if args.category != "" {
