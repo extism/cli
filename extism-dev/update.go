@@ -56,7 +56,7 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 	kernelPath := args.Path("extism", "extism", "runtime", "src", "extism-runtime.wasm")
 	kernel := wasmSource{path: kernelPath}
 
-	if args.all || args.kernel {
+	if (args.all || args.kernel) && args.build {
 		cmd := exec.Command("bash", "build.sh")
 		cmd.Dir = args.Path("extism", "extism", "kernel")
 		cli.Print("Building extism-runtime.wasm")
@@ -68,7 +68,7 @@ func runDevUpdate(cmd *cobra.Command, args *devUpdateArgs) error {
 		}
 	}
 
-	if args.all || args.wasm {
+	if (args.all || args.wasm) && args.build {
 		cmd := exec.Command("make")
 		cmd.Dir = args.Path("extism", "plugins")
 		cli.Print("Building plugins in extism/plugins")
