@@ -76,8 +76,12 @@
         "category": "pdk"
     },
     {
+        "url": "git@github.com:extism/dotnet-pdk",
+        "category": "pdk"
+    },
+    {
         "url": "git@github.com:extism/extism-dbg",
-        "category": "other"
+        "category": "debug"
     },
     {
         "url": "git@github.com:extism/plugins",
