@@ -174,7 +174,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
 					Log("Creating directory for lib:", lib)
 					os.MkdirAll(lib, 0o755)
-					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.libDir, item.Name))
+					out, err := os.Create(filepath.Join(lib, item.Name))
 					if err != nil {
 						return err
 					}
@@ -187,7 +187,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					include := filepath.Join(installArgs.prefix, installArgs.includeDir)
 					Log("Creating directory for header file:", include)
 					os.MkdirAll(include, 0o755)
-					out, err := os.Create(filepath.Join(installArgs.prefix, installArgs.includeDir, item.Name))
+					out, err := os.Create(filepath.Join(include, item.Name))
 					if err != nil {
 						return err
 					}
@@ -195,6 +195,20 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
 					out.Close()
+				} else if strings.HasSuffix(item.Name, getStaticLibFileName(installArgs.os)) {
+					Log("Found static librry in tarball")
+					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
+					Log("Creating directory for lib:", lib)
+					os.MkdirAll(lib, 0o755)
+					out, err := os.Create(filepath.Join(lib, item.Name))
+					if err != nil {
+						return err
+					}
+
+					Print("Copying", item.Name, "to", out.Name())
+					io.Copy(out, tarReader)
+					out.Close()
+
 				} else {
 					Log("File:", item.Name)
 				}
@@ -215,14 +229,21 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 	Print("Removing", soFile)
 	err := os.Remove(soFile)
 	if err != nil {
-		return err
+		Print(err)
+	}
+
+	staticLibFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, getStaticLibFileName(runtime.GOOS))
+	Print("Removing", staticLibFile)
+	err = os.Remove(staticLibFile)
+	if err != nil {
+		Print(err)
 	}
 
 	headerFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.includeDir, "extism.h")
 	Print("Removing", headerFile)
 	err = os.Remove(headerFile)
 	if err != nil {
-		return err
+		Print(err)
 	}
 
 	return nil
