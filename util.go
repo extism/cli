@@ -38,6 +38,14 @@ func getSharedObjectFileName(os string) string {
 	}
 }
 
+func getStaticLibFileName(os string) string {
+	if os == "windows" || os == "windows-gnu" {
+		return "extism.lib"
+	} else {
+		return "libextism.a"
+	}
+}
+
 func copyFile(src string, dest string) error {
 	Print("Copying", src, "to", dest)
 	bytesRead, err := ioutil.ReadFile(src)
