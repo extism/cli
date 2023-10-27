@@ -196,7 +196,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					io.Copy(out, tarReader)
 					out.Close()
 				} else if strings.HasSuffix(item.Name, getStaticLibFileName(installArgs.os)) {
-					Log("Found static librry in tarball")
+					Log("Found static library in tarball")
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
 					Log("Creating directory for lib:", lib)
 					os.MkdirAll(lib, 0o755)
