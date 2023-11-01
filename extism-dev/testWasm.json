@@ -1,4 +1,7 @@
 {
   "globals.wasm": "extism/c-pdk/examples/globals/globals.wasm",
-  "code-functions.wasm": "extism/c-pdk/examples/host-functions/host-functions.wasm"
+  "code-functions.wasm": "extism/c-pdk/examples/host-functions/host-functions.wasm",
+  "alloc.wasm": "extism/c-pdk/tests/alloc.wasm",
+  "hello.wasm": "extism/c-pdk/tests/hello.wasm",
+  "fail.wasm": "extism/c-pdk/tests/fail.wasm"
 }
