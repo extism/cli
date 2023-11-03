@@ -181,9 +181,9 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					if err != nil {
 						return err
 					}
-					out.Close()
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
+					out.Close()
 				} else if strings.HasSuffix(item.Name, ".h") {
 					Log("Found header file in tarball")
 					include := filepath.Join(installArgs.prefix, installArgs.includeDir)
@@ -193,10 +193,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					if err != nil {
 						return err
 					}
-					defer out.Close()
 
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
+					out.Close()
 				} else if strings.HasSuffix(item.Name, getStaticLibFileName(installArgs.os)) {
 					Log("Found static library in tarball")
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
@@ -206,10 +206,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					if err != nil {
 						return err
 					}
-					defer out.Close()
 
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
+					out.Close()
 				} else if strings.HasSuffix(item.Name, ".pc.in") {
 					if strings.Contains(installArgs.os, "windows") {
 						continue
@@ -225,7 +225,6 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					if err != nil {
 						return err
 					}
-					defer out.Close()
 
 					Print("Copying", item.Name, "to", out.Name())
 					r := bufio.NewReader(tarReader)
@@ -235,6 +234,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 							break
 						}
 						if err != nil {
+							out.Close()
 							return err
 						}
 
@@ -244,6 +244,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 
 						io.WriteString(out, line)
 					}
+					out.Close()
 				} else {
 					Log("File:", item.Name)
 				}
