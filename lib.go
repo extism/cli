@@ -2,6 +2,7 @@ package cli
 
 import (
 	"archive/tar"
+	"bufio"
 	"compress/gzip"
 	"context"
 	"errors"
@@ -169,6 +170,8 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					break
 				}
 
+				item.Name = strings.Trim(item.Name, " ")
+
 				if strings.HasSuffix(item.Name, getSharedObjectExt(installArgs.os)) {
 					Log("Found shared object file in tarball")
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
@@ -178,7 +181,6 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					if err != nil {
 						return err
 					}
-
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
 					out.Close()
@@ -208,7 +210,41 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					Print("Copying", item.Name, "to", out.Name())
 					io.Copy(out, tarReader)
 					out.Close()
+				} else if strings.HasSuffix(item.Name, ".pc.in") {
+					if strings.Contains(installArgs.os, "windows") {
+						continue
+					}
+					Log("Found pkg-config files")
 
+					pkgconfig := filepath.Join(installArgs.prefix, installArgs.libDir, "pkgconfig")
+					Log("Creating directory for pc file:", pkgconfig)
+					os.MkdirAll(pkgconfig, 0o755)
+
+					outName := strings.ReplaceAll(item.Name, ".pc.in", ".pc")
+					out, err := os.Create(filepath.Join(pkgconfig, outName))
+					if err != nil {
+						return err
+					}
+
+					Print("Copying", item.Name, "to", out.Name())
+					r := bufio.NewReader(tarReader)
+					for {
+						line, err := r.ReadString('\n')
+						if err == io.EOF {
+							break
+						}
+						if err != nil {
+							out.Close()
+							return err
+						}
+
+						if strings.HasPrefix(line, "prefix=PREFIX") {
+							line = strings.ReplaceAll(line, "PREFIX", installArgs.prefix)
+						}
+
+						io.WriteString(out, line)
+					}
+					out.Close()
 				} else {
 					Log("File:", item.Name)
 				}
@@ -242,6 +278,20 @@ func runLibUninstall(cmd *cobra.Command, uninstallArgs *libUninstallArgs) error 
 	headerFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.includeDir, "extism.h")
 	Print("Removing", headerFile)
 	err = os.Remove(headerFile)
+	if err != nil {
+		Print(err)
+	}
+
+	pcFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, "pkgconfig", "extism.pc")
+	Print("Removing", pcFile)
+	err = os.Remove(pcFile)
+	if err != nil {
+		Print(err)
+	}
+
+	staticPcFile := filepath.Join(uninstallArgs.prefix, uninstallArgs.libDir, "pkgconfig", "extism-static.pc")
+	Print("Removing", staticPcFile)
+	err = os.Remove(staticPcFile)
 	if err != nil {
 		Print(err)
 	}
