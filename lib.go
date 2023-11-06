@@ -31,6 +31,7 @@ type libInstallArgs struct {
 	version string
 	os      string
 	arch    string
+	libc    string
 }
 
 type libUninstallArgs struct {
@@ -89,7 +90,7 @@ func findRelease(ctx context.Context, tag string) (release *github.RepositoryRel
 	return nil, errors.New("unable to find release " + tag)
 }
 
-func assetPrefix(os, arch string) (string, error) {
+func assetPrefix(os, arch, libc string) (string, error) {
 	s := "libextism-"
 	if arch == "amd64" {
 		s += "x86_64"
@@ -99,16 +100,20 @@ func assetPrefix(os, arch string) (string, error) {
 		s += arch
 	}
 	if os == "linux" {
-		return s + "-unknown-linux-gnu", nil
+		if libc == "" {
+			libc = "gnu"
+		}
+		return s + "-unknown-linux-" + libc, nil
 	} else if os == "windows" {
-		return s + "-pc-windows-msvc", nil
-	} else if os == "windows-gnu" {
-		return s + "-pc-windows-gnu", nil
-	} else if os == "darwin" || os == "macos" {
+		if libc == "" {
+			libc = "msvc"
+		}
+		return s + "-pc-windows-" + libc, nil
+	} else if (os == "darwin" || os == "macos") && libc == "" {
 		return s + "-apple-darwin", nil
 	}
 
-	return "", errors.New("unsupported " + os + " " + arch)
+	return "", errors.New("unsupported " + arch + "-" + os + "-" + libc)
 }
 
 func sharedLibraryName(os string) string {
@@ -118,8 +123,6 @@ func sharedLibraryName(os string) string {
 	case "macos":
 		return "libextism.dylib"
 	case "windows":
-		fallthrough
-	case "windows-gnu":
 		return "extism.dll"
 	default:
 		return "libextism.so"
@@ -138,7 +141,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 		return err
 	}
 
-	assetName, err := assetPrefix(installArgs.os, installArgs.arch)
+	assetName, err := assetPrefix(installArgs.os, installArgs.arch, installArgs.libc)
 	if err != nil {
 		return err
 	}
@@ -352,6 +355,7 @@ func LibCmd() *cobra.Command {
 		"Install a specified Extism version, `git` or `latest` can be used to specify the latest from git and no version will default to the most recent release")
 	libInstall.Flags().StringVar(&installArgs.os, "os", runtime.GOOS, "The target OS: linux, darwin, windows")
 	libInstall.Flags().StringVar(&installArgs.arch, "arch", runtime.GOARCH, "The target architecture: x86_64, aarch64")
+	libInstall.Flags().StringVar(&installArgs.libc, "libc", "", "The libc implementation/compiler to use: gnu, msvc, musl")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix for libextism installation. libextism will be copied to $prefix/$libdir and extism.h will be copied to $prefix/$includedir")
 	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
