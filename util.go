@@ -23,7 +23,7 @@ func RunArgs[T Args](f func(cmd *cobra.Command, args T) error, call T) func(cmd 
 func getSharedObjectExt(os string) string {
 	if os == "darwin" || os == "macos" {
 		return "dylib"
-	} else if os == "windows" || os == "windows-gnu" {
+	} else if os == "windows" {
 		return "dll"
 	} else {
 		return "so"
@@ -31,7 +31,7 @@ func getSharedObjectExt(os string) string {
 }
 
 func getSharedObjectFileName(os string) string {
-	if os == "windows" || os == "windows-gnu" {
+	if os == "windows" {
 		return "extism." + getSharedObjectExt(os)
 	} else {
 		return "libextism." + getSharedObjectExt(os)
@@ -39,7 +39,7 @@ func getSharedObjectFileName(os string) string {
 }
 
 func getStaticLibFileName(os string) string {
-	if os == "windows" || os == "windows-gnu" {
+	if os == "windows" {
 		return "extism.lib"
 	} else {
 		return "libextism.a"
