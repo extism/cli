@@ -5,7 +5,7 @@ go 1.20
 // replace github.com/extism/cli => ../
 
 require (
-	github.com/extism/cli v0.3.2-0.20231030184635-062543b4db70
+	github.com/extism/cli v0.3.2-0.20231106223642-885dc35c9283
 	github.com/spf13/cobra v1.7.0
 )
 
