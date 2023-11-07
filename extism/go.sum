@@ -18,6 +18,8 @@ github.com/extism/cli v0.3.2-0.20231030184635-062543b4db70 h1:ivPuwmwCEcIZ9MbGKu
 github.com/extism/cli v0.3.2-0.20231030184635-062543b4db70/go.mod h1:KlP/U4fsZBEhQ7FvUloNtU5TMNZHqTNNRb6Y7ogzLnQ=
 github.com/extism/cli v0.3.2-0.20231106223642-885dc35c9283 h1:p3ZH2vU/vZH0du/KqND8M2zP1Vkt0heL+1bnKxv1/xQ=
 github.com/extism/cli v0.3.2-0.20231106223642-885dc35c9283/go.mod h1:KlP/U4fsZBEhQ7FvUloNtU5TMNZHqTNNRb6Y7ogzLnQ=
+github.com/extism/cli v0.3.3-0.20231107022715-032ab667acc2 h1:Ga1xlyITwRA8KIOn0miLdFhsdv35Z9Dxa+f77iSmyxU=
+github.com/extism/cli v0.3.3-0.20231107022715-032ab667acc2/go.mod h1:KlP/U4fsZBEhQ7FvUloNtU5TMNZHqTNNRb6Y7ogzLnQ=
 github.com/extism/go-sdk v0.0.0-20230921104358-9dae66a1d252 h1:Pyaxe1aVUvzTwZR1huGtCapXkYFDjzrFw2fNdXBB49A=
 github.com/extism/go-sdk v0.0.0-20230921104358-9dae66a1d252/go.mod h1:xUfKSEQndAvHBc1Ohdre0e+UdnRzUpVfbA8QLcx4fbY=
 github.com/extism/go-sdk v1.0.0-rc1 h1:R5gtEGivflyY+Gzr/umpwwrk7XJgZirn21154yWzzcI=
