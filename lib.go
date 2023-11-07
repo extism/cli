@@ -310,13 +310,16 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 
 	Log("Found", len(releases))
 
+	search := map[string]bool{}
+
+	for i := range args {
+		search[args[i]] = true
+	}
+
 	for _, rel := range releases {
 		name := rel.GetTagName()
 		if len(args) > 0 {
-			ok := false
-			for a := range args {
-				ok = ok || name == args[a]
-			}
+			_, ok := search[name]
 
 			if !ok {
 				continue
