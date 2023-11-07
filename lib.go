@@ -312,11 +312,30 @@ func runLibVersions(cmd *cobra.Command, args []string) error {
 
 	for _, rel := range releases {
 		name := rel.GetTagName()
-		if name == "latest" {
-			continue
-		}
+		if len(args) > 0 {
+			ok := false
+			for a := range args {
+				ok = ok || name == args[a]
+			}
 
+			if !ok {
+				continue
+			}
+		}
 		Print(name)
+
+		if len(args) > 0 {
+			for _, asset := range rel.Assets {
+				filename := asset.GetName()
+				if !strings.HasSuffix(filename, ".tar.gz") {
+					continue
+				}
+				triple := strings.TrimSuffix(strings.TrimPrefix(filename, "libextism-"), "-"+name+".tar.gz")
+				triple = strings.TrimSuffix(triple, "-main.tar.gz")
+				Print("\t" + triple)
+
+			}
+		}
 	}
 
 	return nil
