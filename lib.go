@@ -32,6 +32,7 @@ type libInstallArgs struct {
 	os      string
 	arch    string
 	libc    string
+	triplet string
 }
 
 type libUninstallArgs struct {
@@ -134,6 +135,20 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 	if installArgs.version == "git" {
 		Log("Converting version from `git` to `latest` ")
 		installArgs.version = "latest"
+	}
+
+	if installArgs.triplet != "" {
+		parts := strings.Split(installArgs.triplet, "-")
+		if len(parts) >= 3 && len(parts) <= 4 {
+			installArgs.arch = parts[0]
+			installArgs.os = parts[2]
+			installArgs.libc = ""
+			if len(parts) == 4 {
+				installArgs.libc = parts[3]
+			}
+		} else {
+			return errors.New("triplet should only have 3 or 4 parts")
+		}
 	}
 
 	rel, err := findRelease(cmd.Context(), installArgs.version)
@@ -378,6 +393,7 @@ func LibCmd() *cobra.Command {
 	libInstall.Flags().StringVar(&installArgs.os, "os", runtime.GOOS, "The target OS: linux, darwin, windows")
 	libInstall.Flags().StringVar(&installArgs.arch, "arch", runtime.GOARCH, "The target architecture: x86_64, aarch64")
 	libInstall.Flags().StringVar(&installArgs.libc, "libc", "", "The libc implementation/compiler to use: gnu, msvc, musl")
+	libInstall.Flags().StringVar(&installArgs.triplet, "triplet", "", "CPU, vendor, and operating system (sometimes incl. libc) combined. Can be used instead of arch, os, and libc fields.")
 	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
 		"Prefix for libextism installation. libextism will be copied to $prefix/$libdir and extism.h will be copied to $prefix/$includedir")
 	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
