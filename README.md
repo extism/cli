@@ -29,6 +29,12 @@ To list the available libextism versions:
 extism lib versions
 ```
 
+To list the available triples for a version:
+
+```shell
+extism lib versions v0.0.1-alpha
+```
+
 ### Install libextism
 
 To install the latest version of `libextism` to `/usr/local`, this will overwrite any existing installation at the same path:
