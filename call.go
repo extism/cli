@@ -157,24 +157,24 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
 
-	var logLevel extism.LogLevel = extism.Off
+	var logLevel extism.LogLevel = extism.LogLevelOff
 	switch call.logLevel {
 	case "info":
-		logLevel = extism.Info
+		logLevel = extism.LogLevelInfo
 	case "debug":
-		logLevel = extism.Debug
+		logLevel = extism.LogLevelDebug
 	case "warn":
-		logLevel = extism.Warn
+		logLevel = extism.LogLevelWarn
 	case "error":
-		logLevel = extism.Error
+		logLevel = extism.LogLevelError
 	case "trace":
-		logLevel = extism.Trace
+		logLevel = extism.LogLevelTrace
 	}
 
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig:  wazero.NewModuleConfig().WithSysWalltime(),
 		RuntimeConfig: wazero.NewRuntimeConfig().WithCloseOnContextDone(call.timeout > 0),
-		LogLevel:      &logLevel,
+		LogLevel:      logLevel,
 		EnableWasi:    call.wasi,
 	}
 
