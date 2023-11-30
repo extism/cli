@@ -385,7 +385,7 @@ func defaultPrefix(osName string) string {
 
 		return strings.ReplaceAll(path.Join(dir, "Extism"), "\\", "/")
 	default:
-		return "/usr/local/xxxxxxxx"
+		return "/usr/local"
 	}
 }
 
