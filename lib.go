@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -378,12 +377,7 @@ func runLibCheck(cmd *cobra.Command, args []string) error {
 func defaultPrefix(osName string) string {
 	switch osName {
 	case "windows":
-		dir, err := os.UserCacheDir()
-		if err != nil {
-			return "C:/"
-		}
-
-		return strings.ReplaceAll(path.Join(dir, "Extism"), "\\", "/")
+		return "."
 	default:
 		return "/usr/local"
 	}
