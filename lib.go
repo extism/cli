@@ -374,6 +374,15 @@ func runLibCheck(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func defaultPrefix(osName string) string {
+	switch osName {
+	case "windows":
+		return "."
+	default:
+		return "/usr/local"
+	}
+}
+
 func LibCmd() *cobra.Command {
 	lib := &cobra.Command{
 		Use:   "lib",
@@ -394,7 +403,7 @@ func LibCmd() *cobra.Command {
 	libInstall.Flags().StringVar(&installArgs.arch, "arch", runtime.GOARCH, "The target architecture: x86_64, aarch64")
 	libInstall.Flags().StringVar(&installArgs.libc, "libc", "", "The libc implementation/compiler to use: gnu, msvc, musl")
 	libInstall.Flags().StringVar(&installArgs.triplet, "triplet", "", "CPU, vendor, and operating system (sometimes incl. libc) combined. Can be used instead of arch, os, and libc fields.")
-	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", "/usr/local",
+	libInstall.Flags().StringVar(&installArgs.prefix, "prefix", defaultPrefix(runtime.GOOS),
 		"Prefix for libextism installation. libextism will be copied to $prefix/$libdir and extism.h will be copied to $prefix/$includedir")
 	libInstall.Flags().StringVar(&installArgs.libDir, "libdir", "lib", "The shared object will be installed to $prefix/$libdir")
 	libInstall.Flags().StringVar(&installArgs.includeDir, "includedir", "include", "The header file will be installed to $prefix/$includedir")
@@ -408,7 +417,7 @@ func LibCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE:         RunArgs(runLibUninstall, uninstallArgs),
 	}
-	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", "/usr/local",
+	libUninstall.Flags().StringVar(&uninstallArgs.prefix, "prefix", defaultPrefix(runtime.GOOS),
 		"Prefix for existing libextism installation")
 	libUninstall.Flags().StringVar(&uninstallArgs.libDir, "libdir", "lib", "The shared object will be removed from $prefix/$libdir")
 	libUninstall.Flags().StringVar(&uninstallArgs.includeDir, "includedir", "include", "The header file will be removed from $prefix/$includedir")

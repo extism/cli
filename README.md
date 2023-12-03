@@ -37,7 +37,7 @@ extism lib versions v0.0.1-alpha
 
 ### Install libextism
 
-To install the latest version of `libextism` to `/usr/local`, this will overwrite any existing installation at the same path:
+To install the latest version of `libextism` to `/usr/local` on macOS and Linux and `.` on Windows, this will overwrite any existing installation at the same path:
 
 ```shell
 sudo PATH=$PATH env extism lib install
