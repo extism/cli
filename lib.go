@@ -257,9 +257,7 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 						}
 
 						if strings.HasPrefix(line, "prefix=") {
-							line = strings.ReplaceAll(line, "@CMAKE_INSTALL_PREFIX@",
-								installArgs.prefix)
-							line = strings.ReplaceAll(line, "PREFIX", installArgs.prefix)
+							line = "prefix=" + installArgs.prefix + "\n"
 						}
 
 						io.WriteString(out, line)
