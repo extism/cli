@@ -8,8 +8,6 @@ github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/ebitengine/purego v0.5.1 h1:hNunhThpOf1vzKl49v6YxIsXLhl92vbBEv1/2Ez3ZrY=
 github.com/ebitengine/purego v0.5.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
-github.com/extism/go-sdk v1.0.0-rc2.0.20231129171340-055ce19ffde4 h1:SUUgCEVofUIoRj+p7ndSW+yQ91Gcf/P5d0mrWtxfrDw=
-github.com/extism/go-sdk v1.0.0-rc2.0.20231129171340-055ce19ffde4/go.mod h1:xUfKSEQndAvHBc1Ohdre0e+UdnRzUpVfbA8QLcx4fbY=
 github.com/extism/go-sdk v1.0.0-rc2.0.20231209013504-3134cddc4600 h1:r1aRHzpVoXxGdoxtjjOs8vet57+vjf0wZY34CYfbAg4=
 github.com/extism/go-sdk v1.0.0-rc2.0.20231209013504-3134cddc4600/go.mod h1:xUfKSEQndAvHBc1Ohdre0e+UdnRzUpVfbA8QLcx4fbY=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=

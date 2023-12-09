@@ -5,8 +5,8 @@ go 1.20
 // replace github.com/extism/cli => ../
 
 require (
-	github.com/extism/cli v0.3.5-0.20231205022742-c906cc9ad7cc
-	github.com/extism/go-sdk v1.0.0-rc2.0.20231129171340-055ce19ffde4
+	github.com/extism/cli v0.3.6-0.20231209013904-20234014ddd7
+	github.com/extism/go-sdk v1.0.0-rc2.0.20231209013504-3134cddc4600
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.8.0
 )
