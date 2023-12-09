@@ -19,7 +19,7 @@ var banner string = `
 func rootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "extism",
-		Version: "0.3.5",
+		Version: "0.3.6",
 		Long:    banner,
 		Short:   "A CLI for Extism, https://extism.org",
 	}
