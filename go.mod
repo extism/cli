@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/ebitengine/purego v0.5.1
-	github.com/extism/go-sdk v1.0.0-rc2.0.20231209013504-3134cddc4600
+	github.com/extism/go-sdk v1.0.0-rc2.0.20231222185549-073f096de1ae
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
 	github.com/tetratelabs/wazero v1.5.0
@@ -18,5 +18,5 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 )
