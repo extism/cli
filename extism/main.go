@@ -24,7 +24,7 @@ func rootCmd() *cobra.Command {
 		Short:   "A CLI for Extism, https://extism.org",
 	}
 	cmd.PersistentFlags().BoolVarP(&cli.LoggingEnabled, "verbose", "v", false, "Enable additional logging")
-	cmd.PersistentFlags().BoolVarP(&cli.PrintingDisabled, "quiet", "q", false, "Enable additional logging")
+	cmd.PersistentFlags().BoolVarP(&cli.PrintingDisabled, "quiet", "q", false, "Suppress output")
 	cmd.PersistentFlags().StringVar(&cli.GithubToken, "github-token", os.Getenv("GITHUB_TOKEN"),
 		"Github access token, can also be set using the $GITHUB_TOKEN env variable")
 	cmd.AddCommand(cli.CallCmd())
