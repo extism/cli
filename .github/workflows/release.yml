@@ -1,6 +1,6 @@
 on:
   release:
-    types: [created]
+    types: [created, edited]
 
 permissions:
     contents: write
@@ -27,4 +27,5 @@ jobs:
         project_path: "./extism"
         binary_name: "extism"
         extra_files: LICENSE README.md
+        release_tag: ${{ github.event.release.tag_name }}
         overwrite: true
