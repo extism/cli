@@ -1,7 +1,9 @@
 package main
 
 import (
+	_ "embed"
 	"os"
+	"strings"
 
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
@@ -16,10 +18,13 @@ var banner string = `
 ╚══════╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝╚═════╝░╚═╝░░░░░╚═╝
 `
 
+//go:embed VERSION
+var version string
+
 func rootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "extism",
-		Version: "0.3.8",
+		Version: strings.TrimSpace(version),
 		Long:    banner,
 		Short:   "A CLI for Extism, https://extism.org",
 	}

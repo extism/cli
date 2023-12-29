@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#
+# usage: `./scripts/cleanup-update-branches.sh`
 
 set -e
 
