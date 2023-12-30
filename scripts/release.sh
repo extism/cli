@@ -4,4 +4,4 @@
 
 set -e
 
-gh release create v$(cat extism/VERSION) --generate-notes
+gh release create v"$(cat extism/VERSION)" --generate-notes
