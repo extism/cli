@@ -2,6 +2,11 @@
 #
 # usage: `./scripts/release.sh`
 
-set -e
+set -eu
 
-gh release create v"$(cat extism/VERSION)" --generate-notes
+VERSION=$(cat extism/VERSION)
+TAG="v$VERSION"
+
+git tag "$TAG"
+git push origin "$TAG"
+gh release create "$TAG" --generate-notes
