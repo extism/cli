@@ -14,7 +14,7 @@ os=$(uname -s | awk '{print tolower($0)}')
 arch=$(uname -m)
 
 usage() {
-  echo "get.sh - A script to help fetch the Extism CLI"
+  echo "get-extism.sh - A script to help fetch the Extism CLI"
   echo ""
   echo "Flags"
   echo "-----"
