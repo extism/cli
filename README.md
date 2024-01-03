@@ -4,25 +4,33 @@ The [Extism](https://github.com/extism/extism) CLI can be used to execute Extism
 
 ## Installation
 
-Using curl/sh:
+### Using curl/sh:
 
 ```shell
 curl https://get.extism.org | sh
 ```
 
-From source:
+See the help output for more options:
+
+```shell
+curl https://get.extism.org | sh -- -h
+```
+
+### From source:
 
 ```shell
 go install github.com/extism/cli/extism@latest
 ```
 
-Using Nix:
+### Using Nix:
 
 ```shell
 nix shell nixpkgs#extism-cli
 ```
 
-Or you can manually download and extract the latest release from [](https://github.com/extism/cli/releases)
+### Manual
+
+You can also download and extract the latest release from [](https://github.com/extism/cli/releases)
 
 ### Call a plugin
 
