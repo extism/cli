@@ -43,9 +43,14 @@ untar() {
 }
 
 print() {
-  if [ $quiet = "n" ]; then
+  if [ "$quiet" = "n" ]; then
     echo $@
   fi
+}
+
+err() {
+  echo $@ >&2
+  exit 1
 }
 
 while getopts "hyqa:s:o:v:" arg "$@"; do
@@ -93,22 +98,28 @@ then
   version=`latest_tag`
 fi
 
-if [ $ask = "y" ]; then
+if [ "$ask" = "y" ] && [ ! -t 0 ]; then
+    if [ ! -t 1 ]; then
+        err "Unable to run interactively. Run with -y to accept defaults, -h for additional options"
+    fi
+fi
+
+
+if [ "$ask" = "y" ]; then
   echo "Confirm installation:"
   echo "  Version: $version"
   echo "  OS: $os"
   echo "  Arch: $arch"
   echo "  Destination: $out_prefix/extism"
   echo -n "Proceed? [y, n]: "
-  read reply
+  read reply < /dev/tty
 else
   reply=y
 fi
-if [ $reply = "y" ]; then
+if [ "$reply" = "y" ]; then
   curl -L -s "$download_url/$version/extism-$version-$os-$arch.tar.gz" | untar
   print "extism executable installed to $out_prefix/extism"
 else
-  print "Exiting"
-  exit 1
+  err "Exiting"
 fi
 
