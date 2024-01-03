@@ -5,6 +5,25 @@ on:
 name: Test
 
 jobs:
+  check_get_extism:
+    name: Check get-extism.sh
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        rust:
+          - stable
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/extism-cli
+
+      - name: Install lib
+        run: |
+          sudo /bin/sh ./script/get-extism.sh -y -o /usr/local/bin
+
+      - name: Test CLI
+        run: |
+          echo "this is a test" | /usr/local/bin/extism call test/code.wasm count_vowels --stdin
   install_latest_and_test:
     name: Install & Test (git latest)
     runs-on: ${{ matrix.os }}
@@ -26,7 +45,7 @@ jobs:
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
           sudo extism --github-token "" lib install --version latest --verbose
-      
+
       - name: Test CLI
         run: |
           echo "this is a test" | extism call test/code.wasm count_vowels --stdin
@@ -55,7 +74,7 @@ jobs:
 
       - name: Test CLI
         run: |
-          echo "this is a test" | extism call test/code.wasm count_vowels --stdin     
+          echo "this is a test" | extism call test/code.wasm count_vowels --stdin
   go_tests:
     name: Go tests (CLI+dev)
     runs-on: ${{ matrix.os }}
@@ -66,18 +85,18 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
           check-latest: true
-    
+
       - name: Test CLI
         run: |
           cd extism
           go test -v -race
-        
+
       - name: Test dev
         run: |
           cd extism-dev
