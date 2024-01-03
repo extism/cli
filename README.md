@@ -30,7 +30,7 @@ nix shell nixpkgs#extism-cli
 
 ### Manual
 
-You can also download and extract the latest release from [](https://github.com/extism/cli/releases)
+You can also download and extract the latest release from [https://github.com/extism/cli/releases](https://github.com/extism/cli/releases)
 
 ### Call a plugin
 
