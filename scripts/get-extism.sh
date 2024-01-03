@@ -38,18 +38,18 @@ untar() {
     _sudo=""
     ;;
   esac
-  $_sudo sh -c "tar -xzO extism > $out_prefix/extism"
-  $_sudo chmod +x $out_prefix/extism
+  $_sudo sh -c "tar -xzO extism > \"$out_prefix/extism\""
+  $_sudo chmod +x "$out_prefix/extism"
 }
 
 print() {
   if [ "$quiet" = "n" ]; then
-    echo $@
+    echo "$@"
   fi
 }
 
 err() {
-  echo $@ >&2
+  echo "$@" >&2
   exit 1
 }
 
@@ -100,9 +100,9 @@ macos)
 esac
 
 # Get latest version if none was specified
-if test -z $version
+if test -z "$version"
 then
-  version=`latest_tag`
+  version="$(latest_tag)"
 fi
 
 if [ "$ask" = "y" ] && [ ! -t 0 ]; then
@@ -119,7 +119,7 @@ if [ "$ask" = "y" ]; then
   echo "  Arch: $arch"
   echo "  Destination: $out_prefix/extism"
   echo "Proceed? [y, n]:"
-  read reply < /dev/tty
+  read -r reply < /dev/tty
 else
   reply=y
 fi
