@@ -19,7 +19,7 @@ jobs:
 
       - name: Install lib
         run: |
-          sudo /bin/sh ./script/get-extism.sh -y -o /usr/local/bin
+          sudo /bin/sh ./scripts/get-extism.sh -y -o /usr/local/bin
 
       - name: Test CLI
         run: |
