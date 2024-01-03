@@ -147,12 +147,12 @@ if [ "$ask" = "y" ]; then
   echo "  Arch: $arch"
   echo "  Destination: $out_prefix/extism"
   echo "  Build from source: $use_go"
-  echo "Proceed? [y/n]:"
+  echo "Proceed? [y/N]:"
   read -r reply < /dev/tty
 else
   reply=y
 fi
-if [ "$reply" = "y" ]; then
+if [ "$reply" = "y" ] || [ "$reply" = "Y" ] || [ "$reply" = "yes" ]; then
   if [ "$use_go" = "y" ]; then
     print "Installing using go install"
     GOOS=$os GOARCH=$arch go install "github.com/extism/cli/extism@$version" || err "Unable to install from source, make sure go is installed"
