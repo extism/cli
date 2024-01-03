@@ -7,6 +7,7 @@ download_url=https://github.com/extism/cli/releases/download
 out_prefix=/usr/local/bin
 ask=y
 quiet=n
+use_go=n
 version=""
 
 # Determine default arch/os
@@ -24,6 +25,7 @@ usage() {
   echo "  -s: set the target operating system (linux, macos)"
   echo "  -o: installation prefix (default: /usr/local/bin)"
   echo "  -y: accept defaults, don't ask before executing commands"
+  echo "  -g: build from source using go"
 }
 
 latest_tag() {
@@ -31,15 +33,14 @@ latest_tag() {
 }
 
 untar() {
-  print "Extracting release"
-  _sudo=sudo
-  case $out_prefix in
-  $HOME/*)
-    _sudo=""
-    ;;
-  esac
+  print "Extracting release to $out_prefix/extism"
   $_sudo sh -c "tar -xzO extism > \"$out_prefix/extism\""
   $_sudo chmod +x "$out_prefix/extism"
+}
+
+go_install_exe() {
+  print "Copying executable to $out_prefix/extism"
+  $_sudo cp $go_bin/extism $out_prefix/extism
 }
 
 print() {
@@ -53,7 +54,7 @@ err() {
   exit 1
 }
 
-while getopts "hyqa:s:o:v:" arg "$@"; do
+while getopts "hyqa:s:o:v:g" arg "$@"; do
     case "$arg" in
         h)
             usage
@@ -77,10 +78,21 @@ while getopts "hyqa:s:o:v:" arg "$@"; do
         v)
             version=$OPTARG
             ;;
+        g)
+            use_go=y
+            ;;
         *)
             ;;
         esac
 done
+
+
+_sudo=sudo
+case $out_prefix in
+$HOME/*)
+  _sudo=""
+  ;;
+esac
 
 # Fix arch names
 case "$arch" in
@@ -99,6 +111,15 @@ macos)
   ;;
 esac
 
+case "$os-$arch" in
+  darwin-amd64|darwin-arm64) ;;
+  linux-amd64|linux-arm) ;;
+  *)
+    print "No prebuilt executables are available for $os-$arch"
+    print "Attempting to build from source"
+    use_go=y
+esac
+
 # Get latest version if none was specified
 if test -z "$version"
 then
@@ -111,6 +132,13 @@ if [ "$ask" = "y" ] && [ ! -t 0 ]; then
     fi
 fi
 
+if [ "$use_go" = "y" ]; then
+  version="latest" 
+  go_bin=$(go env GOBIN)
+  if [ "$go_bin" = "" ]; then
+    go_bin="$HOME/go/bin"
+  fi
+fi
 
 if [ "$ask" = "y" ]; then
   echo "Confirm installation:"
@@ -118,13 +146,21 @@ if [ "$ask" = "y" ]; then
   echo "  OS: $os"
   echo "  Arch: $arch"
   echo "  Destination: $out_prefix/extism"
-  echo "Proceed? [y, n]:"
+  echo "  Build from source: $use_go"
+  echo "Proceed? [y/n]:"
   read -r reply < /dev/tty
 else
   reply=y
 fi
 if [ "$reply" = "y" ]; then
-  curl -L -s "$download_url/$version/extism-$version-$os-$arch.tar.gz" | untar
+  if [ "$use_go" = "y" ]; then
+    print "Installing using go install"
+    GOOS=$os GOARCH=$arch go install "github.com/extism/cli/extism@$version" || err "Unable to install from source, make sure go is installed"
+    go_install_exe
+    exit 0
+  else
+    curl -L -s "$download_url/$version/extism-$version-$os-$arch.tar.gz" | untar
+  fi
   print "extism executable installed to $out_prefix/extism"
 else
   err "Exiting"
