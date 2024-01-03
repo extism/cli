@@ -118,7 +118,7 @@ if [ "$ask" = "y" ]; then
   echo "  OS: $os"
   echo "  Arch: $arch"
   echo "  Destination: $out_prefix/extism"
-  echo -n "Proceed? [y, n]: "
+  echo "Proceed? [y, n]:"
   read reply < /dev/tty
 else
   reply=y
