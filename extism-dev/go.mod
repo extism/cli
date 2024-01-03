@@ -6,7 +6,7 @@ go 1.20
 
 require (
 	github.com/extism/cli v0.3.6-0.20231209013904-20234014ddd7
-	github.com/extism/go-sdk v1.0.0-rc2.0.20231222185549-073f096de1ae
+	github.com/extism/go-sdk v1.0.0-rc3.0.20240103215523-a80324c22a11
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.8.0
 )
@@ -19,7 +19,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tetratelabs/wazero v1.5.0 // indirect
+	github.com/tetratelabs/wazero v1.6.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 )
