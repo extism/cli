@@ -19,11 +19,11 @@ usage() {
   echo "Flags"
   echo "-----"
   echo "  -h: print this usage message"
-  echo "  -a: set the target machine architecture"
-  echo "  -s: set the target operating system"
+  echo "  -q: quiet mode, silence updates to stdout"
+  echo "  -a: set the target machine architecture (amd64, arm64)"
+  echo "  -s: set the target operating system (linux, macos)"
   echo "  -o: installation prefix (default: /usr/local/bin)"
-  echo "  -y: don't ask before executing commands"
-  echo "  -q: don't print updated to stdout"
+  echo "  -y: accept defaults, don't ask before executing commands"
 }
 
 latest_tag() {
@@ -88,6 +88,13 @@ x86_64)
   arch=amd64 ;;
 aarch64)
   arch=arm64 ;;
+*)
+  ;;
+esac
+
+case "$os" in
+macos)
+  os=darwin;;
 *)
   ;;
 esac
