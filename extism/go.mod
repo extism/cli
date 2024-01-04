@@ -5,13 +5,13 @@ go 1.20
 // replace github.com/extism/cli => ../
 
 require (
-	github.com/extism/cli v0.3.6-0.20231209013904-20234014ddd7
+	github.com/extism/cli v0.3.9-0.20240104230820-0c17418a0a80
 	github.com/spf13/cobra v1.8.0
 )
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230923063757-afb1ddc0824c // indirect
-	github.com/cloudflare/circl v1.3.6 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/ebitengine/purego v0.5.1 // indirect
 	github.com/extism/go-sdk v1.0.0-rc3.0.20240103215523-a80324c22a11 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
@@ -21,5 +21,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tetratelabs/wazero v1.6.0 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 )
