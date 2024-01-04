@@ -7,13 +7,13 @@ The [Extism](https://github.com/extism/extism) CLI can be used to execute Extism
 ### Using curl/sh:
 
 ```shell
-curl https://get.extism.org | sh
+curl https://get.extism.org/cli | sh
 ```
 
 See the help output for more options:
 
 ```shell
-curl https://get.extism.org | sh -- -h
+curl https://get.extism.org/cli | sh -- -h
 ```
 
 ### From source:
