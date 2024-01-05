@@ -4,6 +4,10 @@
 
 VERSION=${1-main}
 
+# update cli
+go get -u "github.com/extism/go-sdk@$VERSION"
+go mod tidy
+
 # update extism
 cd extism || exit 1
 go get -u "github.com/extism/go-sdk@$VERSION"
