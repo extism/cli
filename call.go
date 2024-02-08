@@ -15,19 +15,20 @@ import (
 )
 
 type callArgs struct {
-	args           []string
-	input          string
-	loop           int
-	wasi           bool
-	logLevel       string
-	allowedPaths   []string
-	allowedHosts   []string
-	timeout        uint64
-	memoryMaxPages int
-	config         []string
-	setConfig      string
-	manifest       bool
-	stdin          bool
+	args               []string
+	input              string
+	loop               int
+	wasi               bool
+	logLevel           string
+	allowedPaths       []string
+	allowedHosts       []string
+	timeout            uint64
+	memoryMaxPages     int
+	memoryHttpMaxBytes int
+	config             []string
+	setConfig          string
+	manifest           bool
+	stdin              bool
 }
 
 func readStdin() []byte {
@@ -157,6 +158,11 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
 
+	if call.memoryHttpMaxBytes > 0 {
+		Log("HTTP response max bytes", call.memoryHttpMaxBytes)
+		manifest.Memory.MaxHttpResponseBytes = uint64(call.memoryHttpMaxBytes)
+	}
+
 	var logLevel extism.LogLevel = extism.LogLevelOff
 	switch call.logLevel {
 	case "info":
@@ -237,6 +243,7 @@ func CallCmd() *cobra.Command {
 	flags.StringArrayVar(&call.allowedHosts, "allow-host", []string{}, "Allow access to an HTTP host, if no hosts are listed then all requests will fail. Globs may be used for wildcards")
 	flags.Uint64Var(&call.timeout, "timeout", 0, "Timeout in milliseconds")
 	flags.IntVar(&call.memoryMaxPages, "memory-max", 0, "Maximum number of pages to allocate")
+	flags.IntVar(&call.memoryHttpMaxBytes, "http-response-max", -1, "Maximum HTTP response size in bytes when using `extism_http_request`")
 	flags.StringArrayVar(&call.config, "config", []string{}, "Set config values, should be in KEY=VALUE format")
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
 	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
