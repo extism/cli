@@ -13,7 +13,7 @@ curl https://get.extism.org/cli | sh
 See the help output for more options:
 
 ```shell
-curl https://get.extism.org/cli | sh -- -h
+curl https://get.extism.org/cli | sh -s -- -h
 ```
 
 ### From source:
