@@ -87,10 +87,15 @@ while getopts "hyqa:s:o:v:g" arg "$@"; do
 done
 
 
-_sudo=sudo
+_sudo=$(which sudo)
 case $out_prefix in
 $HOME/*)
   _sudo=""
+  ;;
+*)
+  if [ "$_sudo" = "" ]; then
+    echo "No sudo installation found, but needed to install into $out_prefix" && exit 1
+  fi
   ;;
 esac
 
@@ -145,6 +150,9 @@ if [ "$ask" = "y" ]; then
   echo "  Version: $version"
   echo "  OS: $os"
   echo "  Arch: $arch"
+  if [ "$_sudo" != "" ]; then
+    echo "  Sudo: $_sudo"
+  fi
   echo "  Destination: $out_prefix/extism"
   echo "  Build from source: $use_go"
   echo "Proceed? [y/N]:"
