@@ -1,0 +1,16 @@
+on:
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  purge-cache:
+    runs-on: ubuntu-latest
+    name: Purge get.extism.org cache
+    steps:
+      - run: |
+          curl \
+            -X POST \
+            -H  "Authorization: Bearer ${{ secrets.CF_API_TOKEN }}" \
+            -d '{"files": ["https://get.extism.org/cli"]}' \
+            https://api.cloudflare.com/client/v4/zones/743d5e5a7f33a0b3114b3da1782302d4/purge_cache
