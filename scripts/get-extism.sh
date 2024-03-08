@@ -123,7 +123,7 @@ esac
 
 case "$os-$arch" in
   darwin-amd64|darwin-arm64) ;;
-  linux-amd64|linux-arm) ;;
+  linux-amd64|linux-arm64) ;;
   *)
     print "No prebuilt executables are available for $os-$arch"
     print "Attempting to build from source"
