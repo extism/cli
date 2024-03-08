@@ -87,17 +87,22 @@ while getopts "hyqa:s:o:v:g" arg "$@"; do
 done
 
 
-_sudo=$(which sudo)
-case $out_prefix in
-$HOME/*)
+_user=$(whoami)
+if [ "$_user" = "root" ]; then
   _sudo=""
-  ;;
-*)
-  if [ "$_sudo" = "" ]; then
-    echo "No sudo installation found, but needed to install into $out_prefix" && exit 1
-  fi
-  ;;
-esac
+else
+  _sudo=$(which sudo)
+  case $out_prefix in
+  $HOME/*)
+    _sudo=""
+    ;;
+  *)
+    if [ "$_sudo" = "" ]; then
+      echo "No sudo installation found, but needed to install into $out_prefix" && exit 1
+    fi
+    ;;
+  esac
+fi
 
 # Fix arch names
 case "$arch" in
