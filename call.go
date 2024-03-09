@@ -25,6 +25,7 @@ type callArgs struct {
 	timeout            uint64
 	memoryMaxPages     int
 	memoryHttpMaxBytes int
+	memoryVarMaxBytes  int
 	config             []string
 	setConfig          string
 	manifest           bool
@@ -153,14 +154,28 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	// Memory
-	if call.memoryMaxPages != 0 {
+	if call.memoryMaxPages > 0 {
+		if manifest.Memory == nil {
+			manifest.Memory = &extism.ManifestMemory{}
+		}
 		Log("Max pages", call.memoryMaxPages)
 		manifest.Memory.MaxPages = uint32(call.memoryMaxPages)
 	}
 
-	if call.memoryHttpMaxBytes > 0 {
+	if call.memoryHttpMaxBytes >= 0 {
+		if manifest.Memory == nil {
+			manifest.Memory = &extism.ManifestMemory{}
+		}
 		Log("HTTP response max bytes", call.memoryHttpMaxBytes)
-		manifest.Memory.MaxHttpResponseBytes = uint64(call.memoryHttpMaxBytes)
+		manifest.Memory.MaxHttpResponseBytes = int64(call.memoryHttpMaxBytes)
+	}
+
+	if call.memoryVarMaxBytes >= 0 {
+		if manifest.Memory == nil {
+			manifest.Memory = &extism.ManifestMemory{}
+		}
+		Log("Var store size", call.memoryVarMaxBytes)
+		manifest.Memory.MaxVarBytes = int64(call.memoryVarMaxBytes)
 	}
 
 	var logLevel extism.LogLevel = extism.LogLevelOff
@@ -244,6 +259,7 @@ func CallCmd() *cobra.Command {
 	flags.Uint64Var(&call.timeout, "timeout", 0, "Timeout in milliseconds")
 	flags.IntVar(&call.memoryMaxPages, "memory-max", 0, "Maximum number of pages to allocate")
 	flags.IntVar(&call.memoryHttpMaxBytes, "http-response-max", -1, "Maximum HTTP response size in bytes when using `extism_http_request`")
+	flags.IntVar(&call.memoryVarMaxBytes, "var-max", -1, "Maximum size in bytes of Extism var store")
 	flags.StringArrayVar(&call.config, "config", []string{}, "Set config values, should be in KEY=VALUE format")
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
 	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
