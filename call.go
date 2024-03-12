@@ -221,7 +221,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
 		Log("Calling", funcName)
-		exit, res, err := plugin.Call(funcName, input)
+		exit, res, err := plugin.CallWithContext(ctx, funcName, input)
 		if err != nil {
 			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")

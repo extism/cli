@@ -6,7 +6,7 @@ go 1.20
 
 require (
 	github.com/extism/cli v0.3.9-0.20240104230820-0c17418a0a80
-	github.com/extism/go-sdk v1.1.1-0.20240307175526-a1a281594a4e
+	github.com/extism/go-sdk v1.2.0
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.8.0
 )
