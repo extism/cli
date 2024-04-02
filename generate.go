@@ -89,7 +89,6 @@ func generatePlugin(lang string, dir string) error {
 }
 
 func cloneTemplate(pdk pdkTemplate, dir string) error {
-	fmt.Println(pdk.Url)
 	cloneCmd := exec.Command("git", "clone", pdk.Url, dir)
 	cloneCmd.Stdout = os.Stdout
 	cloneCmd.Stderr = os.Stderr
