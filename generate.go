@@ -89,9 +89,24 @@ func generatePlugin(lang string, dir string) error {
 		}
 	} else {
 		pdk := pickPdk(templates)
-		fmt.Println(pdk.Url)
+		return cloneTemplate(pdk, dir)
 	}
 
+	return nil
+}
+
+func cloneTemplate(pdk pdkTemplate, dir string) error {
+	cloneCmd := exec.Command("git", "clone", pdk.Url, dir)
+	cloneCmd.Stdout = os.Stdout
+	cloneCmd.Stderr = os.Stderr
+	if err := cloneCmd.Start(); err != nil {
+		return err
+	}
+	if err := cloneCmd.Wait(); err != nil {
+		return err
+	}
+
+	fmt.Println("Generated", pdk.Pdk, "plugin scaffold at", dir)
 	return nil
 }
 
