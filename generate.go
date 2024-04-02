@@ -21,8 +21,8 @@ import (
 var templatesData []byte
 
 type pdkTemplate struct {
-	Pdk string `json:"pdk"`
-	Url string `json:"url"`
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 
 func GenerateCmd() *cobra.Command {
@@ -67,7 +67,7 @@ func generatePlugin(lang string, dir string) error {
 		var match bool
 		var pdk pdkTemplate
 		for _, tmpl := range templates {
-			if strings.ToLower(tmpl.Pdk) == lang {
+			if strings.ToLower(tmpl.Name) == lang {
 				match = true
 				pdk = tmpl
 				break
@@ -89,6 +89,7 @@ func generatePlugin(lang string, dir string) error {
 }
 
 func cloneTemplate(pdk pdkTemplate, dir string) error {
+	fmt.Println(pdk.Url)
 	cloneCmd := exec.Command("git", "clone", pdk.Url, dir)
 	cloneCmd.Stdout = os.Stdout
 	cloneCmd.Stderr = os.Stderr
@@ -113,7 +114,7 @@ func cloneTemplate(pdk pdkTemplate, dir string) error {
 		return err
 	}
 
-	fmt.Println("Generated", pdk.Pdk, "plugin scaffold at", dir)
+	fmt.Println("Generated", pdk.Name, "plugin scaffold at", dir)
 
 	return nil
 }
@@ -194,7 +195,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *model) View() string {
 	if m.choice != "" {
-		return quitTextStyle.Render(fmt.Sprintf("Generating scaffold for plugin using %s-pdk...", m.choice))
+		return quitTextStyle.Render(fmt.Sprintf("Generating scaffold for plugin using %s...", m.choice))
 	}
 	if m.quitting {
 		return "Operation cancelled."
@@ -206,8 +207,8 @@ func pickPdk(pdks []pdkTemplate) pdkTemplate {
 	pdkMap := make(map[string]pdkTemplate, len(pdks))
 	var items []list.Item
 	for _, pdk := range pdks {
-		pdkMap[pdk.Pdk] = pdk
-		items = append(items, item(pdk.Pdk))
+		pdkMap[pdk.Name] = pdk
+		items = append(items, item(pdk.Name))
 	}
 
 	const defaultWidth = 20
