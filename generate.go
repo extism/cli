@@ -102,7 +102,7 @@ func cloneTemplate(pdk pdkTemplate, dir string) error {
 	return nil
 }
 
-const listHeight = 14
+const listHeight = 15
 
 var (
 	titleStyle        = lipgloss.NewStyle().Bold(true)
