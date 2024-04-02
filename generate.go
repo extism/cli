@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -98,7 +99,22 @@ func cloneTemplate(pdk pdkTemplate, dir string) error {
 		return err
 	}
 
+	if err := os.RemoveAll(filepath.Join(dir, ".git")); err != nil {
+		return err
+	}
+
+	initCmd := exec.Command("git", "init", dir)
+	initCmd.Stdout = os.Stdout
+	initCmd.Stderr = os.Stderr
+	if err := initCmd.Start(); err != nil {
+		return err
+	}
+	if err := initCmd.Wait(); err != nil {
+		return err
+	}
+
 	fmt.Println("Generated", pdk.Pdk, "plugin scaffold at", dir)
+
 	return nil
 }
 
