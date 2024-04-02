@@ -64,27 +64,19 @@ func generatePlugin(lang string, dir string) error {
 	lang = strings.ToLower(lang)
 	if lang != "" {
 		var match bool
-		var url string
+		var pdk pdkTemplate
 		for _, tmpl := range templates {
 			if strings.ToLower(tmpl.Pdk) == lang {
 				match = true
-				url = tmpl.Url
+				pdk = tmpl
 				break
 			}
 		}
 
 		if match {
-			cloneCmd := exec.Command("git", "clone", url, dir)
-			cloneCmd.Stdout = os.Stdout
-			cloneCmd.Stderr = os.Stderr
-			if err := cloneCmd.Start(); err != nil {
+			if err := cloneTemplate(pdk, dir); err != nil {
 				return err
 			}
-			if err := cloneCmd.Wait(); err != nil {
-				return err
-			}
-
-			fmt.Println("Generated", lang, "plugin scaffold at", dir)
 			return nil
 		}
 	} else {
@@ -113,7 +105,7 @@ func cloneTemplate(pdk pdkTemplate, dir string) error {
 const listHeight = 14
 
 var (
-	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
+	titleStyle        = lipgloss.NewStyle().Bold(true)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
@@ -217,6 +209,10 @@ func pickPdk(pdks []pdkTemplate) pdkTemplate {
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
+	}
+
+	if m.choice == "" {
+		os.Exit(0)
 	}
 
 	return pdkMap[m.choice]
