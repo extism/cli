@@ -3,5 +3,9 @@
   "code-functions.wasm": "extism/c-pdk/examples/host-functions/host-functions.wasm",
   "alloc.wasm": "extism/c-pdk/tests/alloc.wasm",
   "hello.wasm": "extism/c-pdk/tests/hello.wasm",
-  "fail.wasm": "extism/c-pdk/tests/fail.wasm"
+  "code.wasm": "extism/plugins/plugins/count_vowels.wasm",
+  "count_vowels.wasm": "extism/plugins/plugins/count_vowels.wasm",
+  "fail.wasm": "extism/c-pdk/tests/fail.wasm",
+  "http.wasm": "extism/plugins/plugins/http.wasm",
+  "reflect.wasm": "extism/plugins/plugins/reflect.wasm"
 }
