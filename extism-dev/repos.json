@@ -52,6 +52,18 @@
         "category": "sdk"
     },
     {
+        "url": "git@github.com:extism/lean4-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/perl-sdk",
+        "category": "sdk"
+    },
+    {
+        "url": "git@github.com:extism/d-sdk",
+        "category": "sdk"
+    },
+    {
         "url": "git@github.com:extism/zig-pdk",
         "category": "pdk"
     },
