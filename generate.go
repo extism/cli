@@ -25,20 +25,25 @@ type pdkTemplate struct {
 }
 
 func GenerateCmd() *cobra.Command {
-	var lang, dir string
+	var lang, dir, tag string
 	cmd :=
 		&cobra.Command{
-			Use:       "generate [resource]",
-			Aliases:   []string{"gen"},
-			Short:     "Generate scaffolding for a new Extism resource, e.g. 'plugin'",
-			Example:   "generate plugin",
-			ValidArgs: []string{"plugin"},
-			Args:      cobra.ExactArgs(1),
+			Use:          "generate [resource]",
+			Aliases:      []string{"gen"},
+			Short:        "Generate scaffolding for a new Extism resource, e.g. 'plugin'",
+			Example:      "generate plugin",
+			ValidArgs:    []string{"plugin"},
+			SilenceUsage: true,
 			RunE: func(cmd *cobra.Command, args []string) error {
+				if len(args) == 0 || args[0] == "" {
+					cmd.Help()
+					return fmt.Errorf("not enough arguments, expected resource name (plugin, ...)")
+				}
 				switch args[0] {
 				case "plugin":
-					return generatePlugin(lang, dir)
+					return generatePlugin(lang, dir, tag)
 				default:
+					cmd.Help()
 					return fmt.Errorf("unsupported resource: '%s'", args[0])
 				}
 			},
@@ -47,11 +52,12 @@ func GenerateCmd() *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVarP(&lang, "lang", "l", "", "[optional] The name of the PDK language to generate a plugin scaffold, e.g. 'rust'")
 	flags.StringVarP(&dir, "output", "o", ".", "The path to an output directory where resource scaffolding will be generated")
+	flags.StringVarP(&tag, "tag", "t", "main", "A tag to clone from the template repository")
 
 	return cmd
 }
 
-func generatePlugin(lang string, dir string) error {
+func generatePlugin(lang string, dir, tag string) error {
 	if _, err := exec.LookPath("git"); err != nil {
 		return errors.New("missing `git`, please install before executing this command")
 	}
@@ -74,14 +80,14 @@ func generatePlugin(lang string, dir string) error {
 		}
 
 		if match {
-			if err := cloneTemplate(pdk, dir); err != nil {
+			if err := cloneTemplate(pdk, dir, tag); err != nil {
 				return err
 			}
 			return nil
 		}
 	} else {
 		pdk := pickPdk(templates)
-		return cloneTemplate(pdk, dir)
+		return cloneTemplate(pdk, dir, tag)
 	}
 
 	return nil
@@ -97,8 +103,8 @@ func runCmdInDir(dir, name string, args ...string) error {
 	return cmd.Run()
 }
 
-func cloneTemplate(pdk pdkTemplate, dir string) error {
-	if err := runCmdInDir("", "git", "clone", pdk.Url, dir); err != nil {
+func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
+	if err := runCmdInDir("", "git", "clone", "--depth=1", pdk.Url, "--branch", tag, dir); err != nil {
 		return err
 	}
 
