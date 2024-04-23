@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -88,28 +87,34 @@ func generatePlugin(lang string, dir string) error {
 	return nil
 }
 
+func runCmdInDir(dir, name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if dir != "" {
+		cmd.Dir = dir
+	}
+	return cmd.Run()
+}
+
 func cloneTemplate(pdk pdkTemplate, dir string) error {
-	cloneCmd := exec.Command("git", "clone", pdk.Url, dir)
-	cloneCmd.Stdout = os.Stdout
-	cloneCmd.Stderr = os.Stderr
-	if err := cloneCmd.Start(); err != nil {
-		return err
-	}
-	if err := cloneCmd.Wait(); err != nil {
+	if err := runCmdInDir("", "git", "clone", pdk.Url, dir); err != nil {
 		return err
 	}
 
-	if err := os.RemoveAll(filepath.Join(dir, ".git")); err != nil {
+	if err := runCmdInDir(dir, "git", "checkout", "--orphan", "extism-init", "main"); err != nil {
 		return err
 	}
 
-	initCmd := exec.Command("git", "init", dir)
-	initCmd.Stdout = os.Stdout
-	initCmd.Stderr = os.Stderr
-	if err := initCmd.Start(); err != nil {
+	if err := runCmdInDir(dir, "git", "commit", "-am", "init: extism"); err != nil {
 		return err
 	}
-	if err := initCmd.Wait(); err != nil {
+
+	if err := runCmdInDir(dir, "git", "branch", "-M", "extism-init", "main"); err != nil {
+		return err
+	}
+
+	if err := runCmdInDir(dir, "git", "remote", "remove", "origin"); err != nil {
 		return err
 	}
 
