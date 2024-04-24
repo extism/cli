@@ -1,0 +1,38 @@
+[
+    { 
+        "name": "Rust",
+        "url": "https://github.com/extism/rust-pdk-template" 
+    },
+    { 
+        "name": "JavaScript",
+        "url": "https://github.com/extism/js-pdk-template" 
+    },
+    { 
+        "name": "Go",
+        "url": "https://github.com/extism/go-pdk-template" 
+    },
+    { 
+        "name": "Zig",
+        "url": "https://github.com/extism/zig-pdk-template" 
+    },
+    { 
+        "name": "C#",
+        "url": "https://github.com/extism/c-sharp-pdk-template" 
+    },
+    { 
+        "name": "F#",
+        "url": "https://github.com/extism/f-sharp-pdk-template" 
+    },
+    { 
+        "name": "C",
+        "url": "https://github.com/extism/c-pdk-template" 
+    },
+    { 
+        "name": "Haskell",
+        "url": "https://github.com/extism/haskell-pdk-template" 
+    },
+    { 
+        "name": "AssemblyScript",
+        "url": "https://github.com/extism/assemblyscript-pdk-template"
+    }
+]
