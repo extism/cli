@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -62,8 +63,20 @@ func generatePlugin(lang string, dir, tag string) error {
 		return errors.New("missing `git`, please install before executing this command")
 	}
 	var templates []pdkTemplate
-	err := json.Unmarshal(templatesData, &templates)
+	data := templatesData
+	res, err := http.Get("https://raw.githubusercontent.com/extism/cli/main/pdk-templates.json")
+	defer res.Body.Close()
+	if err == nil && res.StatusCode == 200 {
+		t, err := io.ReadAll(res.Body)
+		if err == nil {
+			data = t
+		}
+	} else {
+		Log("Unable to fetch PDK templates, falling back to local list")
+	}
+	err = json.Unmarshal(data, &templates)
 	if err != nil {
+		fmt.Println(string(data))
 		return err
 	}
 
