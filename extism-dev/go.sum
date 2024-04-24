@@ -20,6 +20,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.3/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/ebitengine/purego v0.5.1 h1:hNunhThpOf1vzKl49v6YxIsXLhl92vbBEv1/2Ez3ZrY=
 github.com/ebitengine/purego v0.5.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
+github.com/extism/cli v1.2.1-0.20240424190857-5e617c3fbd89 h1:xNckMVzK0eyG534kCXnR8sm0NVdEaBJlY59tsrGNjfY=
+github.com/extism/cli v1.2.1-0.20240424190857-5e617c3fbd89/go.mod h1:Xjwo0e1ZZUgwg8LclPOGJ+5U11t86VEk8hSdh/5Snwo=
 github.com/extism/go-sdk v1.2.0 h1:A0DnIMthdP8h6K9NbRpRs1PIXHOUlb/t/TZWk5eUzx4=
 github.com/extism/go-sdk v1.2.0/go.mod h1:xUfKSEQndAvHBc1Ohdre0e+UdnRzUpVfbA8QLcx4fbY=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=
