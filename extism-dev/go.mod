@@ -2,10 +2,10 @@ module github.com/extism/cli/extism-dev
 
 go 1.20
 
-replace github.com/extism/cli => ../
+// replace github.com/extism/cli => ../
 
 require (
-	github.com/extism/cli v0.3.9-0.20240104230820-0c17418a0a80
+	github.com/extism/cli v1.2.1-0.20240424190857-5e617c3fbd89
 	github.com/extism/go-sdk v1.2.0
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/cobra v1.8.0
