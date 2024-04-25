@@ -25,7 +25,7 @@ go install github.com/extism/cli/extism@latest
 ### Using Nix:
 
 ```shell
-nix shell nixpkgs#extism-cli
+nix-shell -p extism-cli
 ```
 
 ### Manual
