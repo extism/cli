@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -65,12 +66,12 @@ func generatePlugin(lang string, dir, tag string) error {
 	var templates []pdkTemplate
 	data := templatesData
 	res, err := http.Get("https://raw.githubusercontent.com/extism/cli/main/pdk-templates.json")
-	defer res.Body.Close()
 	if err == nil && res.StatusCode == 200 {
 		t, err := io.ReadAll(res.Body)
 		if err == nil {
 			data = t
 		}
+		defer res.Body.Close()
 	} else {
 		Log("Unable to fetch PDK templates, falling back to local list")
 	}
@@ -121,25 +122,55 @@ func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
 		return err
 	}
 
-	if err := runCmdInDir(dir, "git", "checkout", "--orphan", "extism-init", "main"); err != nil {
+	// recursively check that parents are not a git repository, create an orphan branch & commit, cleanup
+	// otherwise, remove the git repository and assume this should be a plain directory within the parent
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
 		return err
 	}
+	if hasGitRepoInParents(absDir, 100) {
+		if err := os.RemoveAll(filepath.Join(dir, ".git")); err != nil {
+			return err
+		}
+	} else {
+		if err := runCmdInDir(dir, "git", "checkout", "--orphan", "extism-init", "main"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "commit", "-am", "init: extism"); err != nil {
-		return err
-	}
+		if err := runCmdInDir(dir, "git", "commit", "-am", "init: extism"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "branch", "-M", "extism-init", "main"); err != nil {
-		return err
-	}
+		if err := runCmdInDir(dir, "git", "branch", "-M", "extism-init", "main"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "remote", "remove", "origin"); err != nil {
-		return err
+		if err := runCmdInDir(dir, "git", "remote", "remove", "origin"); err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Generated", pdk.Name, "plugin scaffold at", dir)
 
 	return nil
+}
+
+func hasGitRepoInParents(dir string, depth int) bool {
+	parent := filepath.Dir(dir)
+	if depth == 0 || parent == "" || parent == "." || parent == dir {
+		return false
+	}
+	fi, err := os.Stat(filepath.Join(parent, ".git"))
+	if err != nil && os.IsNotExist(err) {
+		return hasGitRepoInParents(parent, depth-1)
+
+	}
+	if fi.IsDir() {
+		// found a git repository
+		return true
+	}
+
+	return hasGitRepoInParents(parent, depth-1)
 }
 
 const listHeight = 15
