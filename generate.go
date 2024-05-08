@@ -65,12 +65,12 @@ func generatePlugin(lang string, dir, tag string) error {
 	var templates []pdkTemplate
 	data := templatesData
 	res, err := http.Get("https://raw.githubusercontent.com/extism/cli/main/pdk-templates.json")
-	defer res.Body.Close()
 	if err == nil && res.StatusCode == 200 {
 		t, err := io.ReadAll(res.Body)
 		if err == nil {
 			data = t
 		}
+		defer res.Body.Close()
 	} else {
 		Log("Unable to fetch PDK templates, falling back to local list")
 	}
