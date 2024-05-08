@@ -157,7 +157,6 @@ func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
 
 func hasGitRepoInParents(dir string, depth int) bool {
 	parent := filepath.Dir(dir)
-	fmt.Println("Checking", parent, "dir = ", dir)
 	if depth == 0 || parent == "" || parent == "." || parent == dir {
 		return false
 	}
