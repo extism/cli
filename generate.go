@@ -161,10 +161,9 @@ func hasGitRepoInParents(dir string, depth int) bool {
 		return false
 	}
 	fi, err := os.Stat(filepath.Join(parent, ".git"))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return hasGitRepoInParents(parent, depth-1)
-		}
+	if err != nil && os.IsNotExist(err) {
+		return hasGitRepoInParents(parent, depth-1)
+
 	}
 	if fi.IsDir() {
 		// found a git repository
