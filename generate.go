@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -121,25 +122,57 @@ func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
 		return err
 	}
 
-	if err := runCmdInDir(dir, "git", "checkout", "--orphan", "extism-init", "main"); err != nil {
+	// recursively check that parents are not a git repository, create an orphan branch & commit, cleanup
+	// otherwise, remove the git repository and assume this should be a plain directory within the parent
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
 		return err
 	}
+	if hasGitRepoInParents(absDir, 100) {
+		if err := os.RemoveAll(filepath.Join(dir, ".git")); err != nil {
+			return err
+		}
+	} else {
+		if err := runCmdInDir(dir, "git", "checkout", "--orphan", "extism-init", "main"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "commit", "-am", "init: extism"); err != nil {
-		return err
-	}
+		if err := runCmdInDir(dir, "git", "commit", "-am", "init: extism"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "branch", "-M", "extism-init", "main"); err != nil {
-		return err
-	}
+		if err := runCmdInDir(dir, "git", "branch", "-M", "extism-init", "main"); err != nil {
+			return err
+		}
 
-	if err := runCmdInDir(dir, "git", "remote", "remove", "origin"); err != nil {
-		return err
+		if err := runCmdInDir(dir, "git", "remote", "remove", "origin"); err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Generated", pdk.Name, "plugin scaffold at", dir)
 
 	return nil
+}
+
+func hasGitRepoInParents(dir string, depth int) bool {
+	parent := filepath.Dir(dir)
+	fmt.Println("Checking", parent, "dir = ", dir)
+	if depth == 0 || parent == "" || parent == "." || parent == dir {
+		return false
+	}
+	fi, err := os.Stat(filepath.Join(parent, ".git"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return hasGitRepoInParents(parent, depth-1)
+		}
+	}
+	if fi.IsDir() {
+		// found a git repository
+		return true
+	}
+
+	return hasGitRepoInParents(parent, depth-1)
 }
 
 const listHeight = 15
