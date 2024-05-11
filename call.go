@@ -91,6 +91,8 @@ func (a *callArgs) getConfig() (map[string]string, error) {
 	return config, nil
 }
 
+var globalPlugin *extism.Plugin
+
 func runCall(cmd *cobra.Command, call *callArgs) error {
 	if len(call.args) < 1 {
 		return errors.New("An input file is required")
@@ -204,12 +206,16 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		manifest.Timeout = call.timeout
 	}
 
-	Log("Creating plugin")
-	plugin, err := extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
-	if err != nil {
-		return err
+	if globalPlugin == nil {
+		Log("Creating plugin")
+		globalPlugin, err = extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
+		if err != nil {
+			return err
+		}
+		//defer plugin.Close()
+	} else {
+		Log("Reusing Plugin")
 	}
-	defer plugin.Close()
 
 	input := []byte(call.input)
 	if call.stdin {
@@ -221,7 +227,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	// Call the plugin in a loop
 	for i := 0; i < call.loop; i++ {
 		Log("Calling", funcName)
-		exit, res, err := plugin.CallWithContext(ctx, funcName, input)
+		exit, res, err := globalPlugin.CallWithContext(ctx, funcName, input)
 		if err != nil {
 			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")
@@ -229,7 +235,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 			return err
 		}
 		Log("Call returned", len(res), "bytes")
-		fmt.Print(string(res))
+		fmt.Println(string(res))
 
 		if call.loop > 1 {
 			fmt.Println()
