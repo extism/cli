@@ -3,9 +3,8 @@
 # usage: `./scripts/release.sh`
 
 set -eu
-
-VERSION=$(cat extism/VERSION)
-TAG="v$VERSION"
+version=$(echo -n "$1" | sed 's/v//g')
+TAG="v$version"
 
 git tag "$TAG"
 git push origin "$TAG"
