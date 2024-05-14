@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	shell "github.com/brianstrauch/cobra-shell"
 	"github.com/extism/cli"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +36,7 @@ func rootCmd() *cobra.Command {
 	cmd.AddCommand(cli.CallCmd())
 	cmd.AddCommand(cli.LibCmd())
 	cmd.AddCommand(cli.GenerateCmd())
+	cmd.AddCommand(shell.New(cmd, nil))
 	return cmd
 }
 
