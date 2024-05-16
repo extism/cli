@@ -7,6 +7,10 @@
         "name": "JavaScript",
         "url": "https://github.com/extism/js-pdk-template" 
     },
+    {
+        "name": "TypeScript",
+        "url": "https://github.com/extism/ts-pdk-template"
+    },
     { 
         "name": "Go",
         "url": "https://github.com/extism/go-pdk-template" 
