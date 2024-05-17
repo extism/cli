@@ -107,7 +107,6 @@ func (a *callArgs) getLinkModules() []extism.Wasm {
 		case 2:
 			name = split[0]
 			path = split[1]
-			modules = append(modules, extism.WasmFile{Path: path, Name: name})
 		default:
 			continue
 		}
