@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/extism/go-sdk"
@@ -30,6 +31,7 @@ type callArgs struct {
 	setConfig          string
 	manifest           bool
 	stdin              bool
+	link               []string
 }
 
 func readStdin() []byte {
@@ -91,6 +93,34 @@ func (a *callArgs) getConfig() (map[string]string, error) {
 	return config, nil
 }
 
+func (a *callArgs) getLinkModules() []extism.Wasm {
+	modules := []extism.Wasm{}
+
+	var name, path string
+	for _, x := range a.link {
+		split := strings.SplitN(x, "=", 2)
+		switch len(split) {
+		case 1:
+			fileName := filepath.Base(split[0])
+			name = strings.TrimSuffix(fileName, filepath.Ext(fileName))
+			path = split[0]
+		case 2:
+			name = split[0]
+			path = split[1]
+		default:
+			continue
+		}
+
+		if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
+			modules = append(modules, extism.WasmUrl{Url: path, Name: name})
+		} else {
+			modules = append(modules, extism.WasmFile{Path: path, Name: name})
+		}
+	}
+
+	return modules
+}
+
 var globalPlugin *extism.Plugin
 
 func runCall(cmd *cobra.Command, call *callArgs) error {
@@ -116,9 +146,15 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		if err != nil {
 			return err
 		}
+
+		// Link additional modules from CLI
+		manifest.Wasm = append(call.getLinkModules(), manifest.Wasm...)
+
 		Log("Read manifest:", manifest)
 		defer f.Close()
 	} else {
+		manifest.Wasm = call.getLinkModules()
+
 		if strings.HasPrefix(wasm, "http://") || strings.HasPrefix(wasm, "https://") {
 			Log("Loading wasm file as url:", wasm)
 			manifest.Wasm = append(manifest.Wasm, extism.WasmUrl{Url: wasm})
@@ -270,5 +306,7 @@ func CallCmd() *cobra.Command {
 	flags.StringVar(&call.setConfig, "set-config", "", "Create config object using JSON, this will be merged with any `config` arguments")
 	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
 	flags.StringVar(&call.logLevel, "log-level", "", "Set log level: trace, debug, warn, info, error")
+	flags.StringArrayVar(&call.link, "link", []string{}, "Additional modules to link")
+	cmd.MarkFlagsMutuallyExclusive("input", "stdin")
 	return cmd
 }
