@@ -104,7 +104,12 @@ func generatePlugin(lang string, dir, tag string) error {
 		return cloneTemplate(pdk, dir, tag)
 	}
 
-	return nil
+	var langs []string
+	for _, tmpl := range templates {
+		langs = append(langs, tmpl.Name)
+	}
+
+	return fmt.Errorf("unsupported template: '%s'. Supported templates are: %s", lang, strings.Join(langs, ", "))
 }
 
 func runCmdInDir(dir, name string, args ...string) error {
