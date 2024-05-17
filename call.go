@@ -308,5 +308,6 @@ func CallCmd() *cobra.Command {
 	flags.BoolVarP(&call.manifest, "manifest", "m", false, "When set the input file will be parsed as a JSON encoded Extism manifest instead of a WASM file")
 	flags.StringVar(&call.logLevel, "log-level", "", "Set log level: trace, debug, warn, info, error")
 	flags.StringArrayVar(&call.link, "link", []string{}, "Additional modules to link")
+	cmd.MarkFlagsMutuallyExclusive("input", "stdin")
 	return cmd
 }
