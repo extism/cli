@@ -19,7 +19,8 @@ jobs:
             goos: windows
     steps:
     - run: |
-       bash ./scripts/set-version.sh "${{ github.event.release.tag_name }}"
+        version=$(echo -n "${{ github.event.release.tag_name }}" | sed 's/v//g')
+        echo -n "$version" > extism/VERSION
     - uses: actions/checkout@v3
     - uses: wangyoucao577/go-release-action@v1
       with:
