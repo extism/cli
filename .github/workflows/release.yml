@@ -18,10 +18,9 @@ jobs:
           - goarch: arm64
             goos: windows
     steps:
-    - run: |
-        version=$(echo -n "${{ github.event.release.tag_name }}" | sed 's/v//g')
-        echo -n "$version" > extism/VERSION
     - uses: actions/checkout@v3
+    - run: |
+        bash ./scripts/set-version.sh "${{ github.event.release.tag_name }}"
     - uses: wangyoucao577/go-release-action@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
