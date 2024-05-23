@@ -127,6 +127,13 @@ func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
 		return err
 	}
 
+	// initialize submodules if any
+	if _, err := os.Stat(filepath.Join(dir, ".gitmodules")); err == nil {
+		if err := runCmdInDir(dir, "git", "submodule", "update", "--init", "--recursive"); err != nil {
+			return err
+		}
+	}
+
 	// recursively check that parents are not a git repository, create an orphan branch & commit, cleanup
 	// otherwise, remove the git repository and assume this should be a plain directory within the parent
 	absDir, err := filepath.Abs(dir)
