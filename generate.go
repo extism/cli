@@ -123,7 +123,7 @@ func runCmdInDir(dir, name string, args ...string) error {
 }
 
 func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
-	if err := runCmdInDir("", "git", "clone", "--depth=1", pdk.Url, "--branch", tag, dir); err != nil {
+	if err := runCmdInDir("", "git", "clone", "--depth=1", pdk.Url, "--branch", tag, "--recurse-submodules", dir); err != nil {
 		return err
 	}
 
