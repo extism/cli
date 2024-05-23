@@ -123,15 +123,8 @@ func runCmdInDir(dir, name string, args ...string) error {
 }
 
 func cloneTemplate(pdk pdkTemplate, dir, tag string) error {
-	if err := runCmdInDir("", "git", "clone", "--depth=1", pdk.Url, "--branch", tag, dir); err != nil {
+	if err := runCmdInDir("", "git", "clone", "--depth=1", pdk.Url, "--branch", tag, "--recurse-submodules", dir); err != nil {
 		return err
-	}
-
-	// initialize submodules if any
-	if _, err := os.Stat(filepath.Join(dir, ".gitmodules")); err == nil {
-		if err := runCmdInDir(dir, "git", "submodule", "update", "--init", "--recursive"); err != nil {
-			return err
-		}
 	}
 
 	// recursively check that parents are not a git repository, create an orphan branch & commit, cleanup
