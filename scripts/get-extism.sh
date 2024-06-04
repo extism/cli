@@ -166,8 +166,10 @@ else
   reply=y
 fi
 if [ "$reply" = "y" ] || [ "$reply" = "Y" ] || [ "$reply" = "yes" ]; then
-  print "Creating $out_prefix if it doesn't exist"
-  $_sudo mkdir -p "$out_prefix"
+  if [ ! -d "$out_prefix" ]
+    print "Creating directory $out_prefix"
+    $_sudo mkdir -p "$out_prefix"
+  fi
   if [ "$use_go" = "y" ]; then
     print "Installing using go install"
     GOOS=$os GOARCH=$arch go install "github.com/extism/cli/extism@$version" || err "Unable to install from source, make sure go is installed"
