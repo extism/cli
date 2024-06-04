@@ -166,7 +166,7 @@ else
   reply=y
 fi
 if [ "$reply" = "y" ] || [ "$reply" = "Y" ] || [ "$reply" = "yes" ]; then
-  if [ ! -d "$out_prefix" ]
+  if [ ! -d "$out_prefix" ]; then
     print "Creating directory $out_prefix"
     $_sudo mkdir -p "$out_prefix"
   fi
