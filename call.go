@@ -276,6 +276,10 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		if call.loop > 1 {
 			fmt.Println()
 		}
+
+		if exit != 0 {
+			return errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit))
+		}
 	}
 
 	return nil
