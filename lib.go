@@ -260,6 +260,11 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 							line = "prefix=" + installArgs.prefix + "\n"
 						}
 
+						// Inject `-framework Security` on macOS
+						if installArgs.os == "darwin" && strings.HasPrefix(line, "Libs:") {
+							line = strings.ReplaceAll(line, "Libs: ", "Libs: -framework Security ")
+						}
+
 						io.WriteString(out, line)
 					}
 					out.Close()
