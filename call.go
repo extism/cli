@@ -264,13 +264,13 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	for i := 0; i < call.loop; i++ {
 		Log("Calling", funcName)
 		exit, res, err := globalPlugin.CallWithContext(ctx, funcName, input)
-		if exit != 0 {
-			return errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit))
-		}
 		if err != nil {
 			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")
+			} else if exit != 0 {
+				return errors.Join(err, errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit)))
 			}
+
 			return err
 		}
 		Log("Call returned", len(res), "bytes")
