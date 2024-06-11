@@ -264,6 +264,9 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	for i := 0; i < call.loop; i++ {
 		Log("Calling", funcName)
 		exit, res, err := globalPlugin.CallWithContext(ctx, funcName, input)
+		if exit != 0 {
+			return errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit))
+		}
 		if err != nil {
 			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")
@@ -277,9 +280,6 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 			fmt.Println()
 		}
 
-		if exit != 0 {
-			return errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit))
-		}
 	}
 
 	return nil
