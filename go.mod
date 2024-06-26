@@ -3,14 +3,16 @@ module github.com/extism/cli
 go 1.20
 
 require (
+	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/ebitengine/purego v0.5.1
-	github.com/extism/go-sdk v1.2.0
+	github.com/extism/go-sdk v1.3.0
+	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tetratelabs/wazero v1.6.0
+	github.com/tetratelabs/wazero v1.7.3
 	golang.org/x/sys v0.16.0
 )
 
@@ -18,11 +20,9 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230923063757-afb1ddc0824c // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/brianstrauch/cobra-shell v0.5.0 // indirect
 	github.com/c-bata/go-prompt v0.2.6 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
