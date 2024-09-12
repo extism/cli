@@ -1,6 +1,8 @@
 module github.com/extism/cli
 
-go 1.20
+go 1.21
+
+toolchain go1.22.6
 
 require (
 	github.com/brianstrauch/cobra-shell v0.5.0
@@ -8,11 +10,11 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/ebitengine/purego v0.5.1
-	github.com/extism/go-sdk v1.3.0
+	github.com/extism/go-sdk v1.3.1
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tetratelabs/wazero v1.7.3
+	github.com/tetratelabs/wazero v1.8.0
 	golang.org/x/sys v0.16.0
 )
 
