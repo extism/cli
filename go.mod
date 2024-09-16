@@ -1,8 +1,6 @@
 module github.com/extism/cli
 
-go 1.21
-
-toolchain go1.22.6
+go 1.20
 
 require (
 	github.com/brianstrauch/cobra-shell v0.5.0
