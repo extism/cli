@@ -41,12 +41,12 @@ jobs:
       - name: Install lib
         if: ${{ matrix.os }} == "macos-latest"
         run: |
-          sudo extism lib install --version latest --verbose
+          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --version latest --verbose
 
       - name: Install lib
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
-          sudo extism lib install --version latest --verbose
+          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --version latest --verbose
 
       - name: Test CLI
         run: |
@@ -67,12 +67,12 @@ jobs:
       - name: Install lib
         if: ${{ matrix.os }} == "macos-latest"
         run: |
-          sudo extism lib install --verbose
+          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --verbose
 
       - name: Install lib
         if: ${{ matrix.os }} == "ubuntu-latest"
         run: |
-          sudo extism --github-token "" lib install --verbose
+          sudo extism --github-token ${{ secrets.GITHUB_TOKEN }} lib install --verbose
 
       - name: Test CLI
         run: |
