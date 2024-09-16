@@ -14,7 +14,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tetratelabs/wazero v1.8.0
+	github.com/tetratelabs/wazero v1.8.1-0.20240916092830-1353ca24fef0
 	golang.org/x/sys v0.16.0
 )
 
