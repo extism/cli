@@ -27,8 +27,8 @@ github.com/dylibso/observe-sdk/go v0.0.0-20240819160327-2d926c5d788a h1:UwSIFv5g
 github.com/dylibso/observe-sdk/go v0.0.0-20240819160327-2d926c5d788a/go.mod h1:C8DzXehI4zAbrdlbtOByKX6pfivJTBiV9Jjqv56Yd9Q=
 github.com/ebitengine/purego v0.5.1 h1:hNunhThpOf1vzKl49v6YxIsXLhl92vbBEv1/2Ez3ZrY=
 github.com/ebitengine/purego v0.5.1/go.mod h1:ah1In8AOtksoNK6yk5z1HTJeUkC1Ez4Wk2idgGslMwQ=
-github.com/extism/go-sdk v1.3.2-0.20240916201430-0e4ef3c4e3a7 h1:cU9VrNsNHwbRFx26rbxzAZUYMwlHfWOx4A13pPkaUW0=
-github.com/extism/go-sdk v1.3.2-0.20240916201430-0e4ef3c4e3a7/go.mod h1:yRolc4PvIUQ9J/BBB3QZ5EY1MtXAN2jqBGDGR3Sk54M=
+github.com/extism/go-sdk v1.4.0 h1:8qlZM7A5eB4FyKI9cwxiUA3tzUkXlraKt5CULuzjRxI=
+github.com/extism/go-sdk v1.4.0/go.mod h1:yRolc4PvIUQ9J/BBB3QZ5EY1MtXAN2jqBGDGR3Sk54M=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=
 github.com/gobwas/glob v0.2.3/go.mod h1:d3Ez4x06l9bZtSvzIay5+Yzi0fmZzPgnTbPcKjJAkT8=
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
