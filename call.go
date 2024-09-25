@@ -216,7 +216,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 		manifest.Memory.MaxVarBytes = int64(call.memoryVarMaxBytes)
 	}
 
-	var logLevel extism.LogLevel = extism.LogLevelOff
+	var logLevel extism.LogLevel = extism.LogLevelError
 	switch call.logLevel {
 	case "info":
 		logLevel = extism.LogLevelInfo
@@ -229,6 +229,8 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	case "trace":
 		logLevel = extism.LogLevelTrace
 	}
+
+	extism.SetLogLevel(logLevel)
 
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig:  wazero.NewModuleConfig().WithSysWalltime(),
