@@ -235,7 +235,6 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig:  wazero.NewModuleConfig().WithSysWalltime(),
 		RuntimeConfig: wazero.NewRuntimeConfig().WithCloseOnContextDone(call.timeout > 0),
-		LogLevel:      logLevel,
 		EnableWasi:    call.wasi,
 	}
 
