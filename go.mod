@@ -8,11 +8,11 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/ebitengine/purego v0.5.1
-	github.com/extism/go-sdk v1.4.0
+	github.com/extism/go-sdk v1.5.1-0.20241014170914-c591dab0575d
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tetratelabs/wazero v1.8.1-0.20240916092830-1353ca24fef0
+	github.com/tetratelabs/wazero v1.8.1
 	golang.org/x/sys v0.24.0
 )
 
@@ -23,10 +23,10 @@ require (
 	github.com/c-bata/go-prompt v0.2.6 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
-	github.com/dylibso/observe-sdk/go v0.0.0-20240819160327-2d926c5d788a // indirect
+	github.com/dylibso/observe-sdk/go v0.0.0-20240828172851-9145d8ad07e1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/ianlancetaylor/demangle v0.0.0-20240805132620-81f5be970eca // indirect
+	github.com/ianlancetaylor/demangle v0.0.0-20240912202439-0a2b6291aafd // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
@@ -48,5 +48,5 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/protobuf v1.35.1 // indirect
 )
