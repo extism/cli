@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/ebitengine/purego v0.5.1
-	github.com/extism/go-sdk v1.5.1-0.20241014170914-c591dab0575d
+	github.com/extism/go-sdk v1.6.0
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v55 v55.0.0
 	github.com/spf13/cobra v1.8.0
