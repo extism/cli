@@ -46,3 +46,7 @@ runs:
       shell: bash
       run: |
         ${{ inputs.sudo }} mv .extism-cli/extism/extism ${{ inputs.install_path }}
+
+    - name: Check extism CLI version
+      shell: bash
+      run: extism --version
