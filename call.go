@@ -9,29 +9,30 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/extism/go-sdk"
+	extism "github.com/extism/go-sdk"
 	"github.com/spf13/cobra"
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/sys"
 )
 
 type callArgs struct {
-	args               []string
-	input              string
-	loop               int
-	wasi               bool
-	logLevel           string
-	allowedPaths       []string
-	allowedHosts       []string
-	timeout            uint64
-	memoryMaxPages     int
-	memoryHttpMaxBytes int
-	memoryVarMaxBytes  int
-	config             []string
-	setConfig          string
-	manifest           bool
-	stdin              bool
-	link               []string
+	args                  []string
+	input                 string
+	loop                  int
+	wasi                  bool
+	logLevel              string
+	allowedPaths          []string
+	allowedHosts          []string
+	enableHttpRespHeaders bool
+	timeout               uint64
+	memoryMaxPages        int
+	memoryHttpMaxBytes    int
+	memoryVarMaxBytes     int
+	config                []string
+	setConfig             string
+	manifest              bool
+	stdin                 bool
+	link                  []string
 }
 
 func readStdin() []byte {
@@ -76,7 +77,7 @@ func (a *callArgs) getConfig() (map[string]string, error) {
 		err := json.Unmarshal([]byte(a.setConfig), &config)
 		if err != nil {
 			return config,
-				errors.Join(errors.New("Invalid value for --set-config flag"), err)
+				errors.Join(errors.New("invalid value for --set-config flag"), err)
 		}
 	}
 	for _, cfg := range a.config {
@@ -125,9 +126,9 @@ var globalPlugin *extism.Plugin
 
 func runCall(cmd *cobra.Command, call *callArgs) error {
 	if len(call.args) < 1 {
-		return errors.New("An input file is required")
+		return errors.New("an input file is required")
 	} else if len(call.args) < 2 {
-		return errors.New("A function name is required")
+		return errors.New("a function name is required")
 	}
 
 	ctx := context.Background()
@@ -218,24 +219,25 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 
 	var logLevel extism.LogLevel = extism.LogLevelError
 	switch call.logLevel {
-	case "info":
-		logLevel = extism.LogLevelInfo
+	case "trace":
+		logLevel = extism.LogLevelTrace
 	case "debug":
 		logLevel = extism.LogLevelDebug
+	case "info":
+		logLevel = extism.LogLevelInfo
 	case "warn":
 		logLevel = extism.LogLevelWarn
 	case "error":
 		logLevel = extism.LogLevelError
-	case "trace":
-		logLevel = extism.LogLevelTrace
 	}
 
 	extism.SetLogLevel(logLevel)
 
 	pluginConfig := extism.PluginConfig{
-		ModuleConfig:  wazero.NewModuleConfig().WithSysWalltime(),
-		RuntimeConfig: wazero.NewRuntimeConfig().WithCloseOnContextDone(call.timeout > 0),
-		EnableWasi:    call.wasi,
+		ModuleConfig:              wazero.NewModuleConfig().WithSysWalltime(),
+		RuntimeConfig:             wazero.NewRuntimeConfig().WithCloseOnContextDone(call.timeout > 0),
+		EnableWasi:                call.wasi,
+		EnableHttpResponseHeaders: call.enableHttpRespHeaders,
 	}
 
 	if call.timeout > 0 {
@@ -269,7 +271,7 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 			if exit == sys.ExitCodeDeadlineExceeded {
 				return errors.New("timeout")
 			} else if exit != 0 {
-				return errors.Join(err, errors.New(fmt.Sprintf("Returned non-zero exit code: %d", exit)))
+				return errors.Join(err, fmt.Errorf("returned non-zero exit code: %d", exit))
 			}
 
 			return err
@@ -303,6 +305,7 @@ func CallCmd() *cobra.Command {
 	flags.BoolVar(&call.wasi, "wasi", false, "Enable WASI")
 	flags.StringArrayVar(&call.allowedPaths, "allow-path", []string{}, "Allow a path to be accessed from inside the Wasm sandbox, a path can be either a plain path or a map from HOST_PATH:GUEST_PATH")
 	flags.StringArrayVar(&call.allowedHosts, "allow-host", []string{}, "Allow access to an HTTP host, if no hosts are listed then all requests will fail. Globs may be used for wildcards")
+	flags.BoolVar(&call.enableHttpRespHeaders, "enable-http-response-headers", false, "Enable HTTP response headers to be read by plugins for any request to an allowed host.")
 	flags.Uint64Var(&call.timeout, "timeout", 0, "Timeout in milliseconds")
 	flags.IntVar(&call.memoryMaxPages, "memory-max", 0, "Maximum number of pages to allocate")
 	flags.IntVar(&call.memoryHttpMaxBytes, "http-response-max", -1, "Maximum HTTP response size in bytes when using `extism_http_request`")
