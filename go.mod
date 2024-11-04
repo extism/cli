@@ -16,6 +16,8 @@ require (
 	golang.org/x/sys v0.24.0
 )
 
+// replace github.com/extism/go-sdk => ../go-sdk
+
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230923063757-afb1ddc0824c // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
