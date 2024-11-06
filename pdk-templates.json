@@ -15,6 +15,10 @@
         "name": "Go",
         "url": "https://github.com/extism/go-pdk-template" 
     },
+    {
+        "name": "Python",
+        "url": "https://github.com/extism/python-pdk-template"
+    },
     { 
         "name": "Zig",
         "url": "https://github.com/extism/zig-pdk-template" 
