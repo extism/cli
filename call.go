@@ -246,6 +246,14 @@ func runCall(cmd *cobra.Command, call *callArgs) error {
 	}
 
 	if globalPlugin == nil {
+		if pluginConfig.EnableWasi {
+			_, wasiOutput := os.LookupEnv("EXTISM_ENABLE_WASI_OUTPUT")
+			if ! wasiOutput {
+			    Log("Setting EXTISM_ENABLE_WASI_OUTPUT")
+			    os.Setenv("EXTISM_ENABLE_WASI_OUTPUT", "1")
+			}
+		}
+
 		Log("Creating plugin")
 		globalPlugin, err = extism.NewPlugin(ctx, manifest, pluginConfig, []extism.HostFunction{})
 		if err != nil {
