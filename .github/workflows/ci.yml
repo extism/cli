@@ -13,6 +13,8 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         rust:
           - stable
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/extism-cli
