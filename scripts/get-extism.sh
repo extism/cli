@@ -26,10 +26,15 @@ usage() {
   echo "  -o: installation prefix (default: /usr/local/bin)"
   echo "  -y: accept defaults, don't ask before executing commands"
   echo "  -g: build from source using go"
+  echo ""
+  echo "Environment Variables"
+  echo "---------------------"
+  echo "  GITHUB_TOKEN: GitHub personal access token to avoid API rate limiting"
 }
 
 latest_tag() {
-  curl -s $latest_url | grep tag_name | awk '{ print $2 }' | sed 's/[",]//g'
+  curl -s ${GITHUB_TOKEN:+-H "Authorization: token $GITHUB_TOKEN"} $latest_url | 
+    grep tag_name | awk '{ print $2 }' | sed 's/[",]//g'
 }
 
 untar() {
@@ -134,6 +139,9 @@ esac
 if test -z "$version"
 then
   version="$(latest_tag)"
+  if [ $? -ne 0 ] || [ -z "$version" ]; then
+    err "Failed to fetch latest version from GitHub API (likely rate limited). Run with GITHUB_TOKEN env or try again later."
+  fi
 fi
 
 if [ "$ask" = "y" ] && [ ! -t 0 ]; then
