@@ -194,7 +194,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					Log("Found shared object file in tarball")
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
 					Log("Creating directory for lib:", lib)
-					os.MkdirAll(lib, 0o755)
+					err := os.MkdirAll(lib, 0o755)
+					if err != nil {
+						return err
+					}
 					out, err := os.Create(filepath.Join(lib, item.Name))
 					if err != nil {
 						return err
@@ -206,7 +209,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					Log("Found header file in tarball")
 					include := filepath.Join(installArgs.prefix, installArgs.includeDir)
 					Log("Creating directory for header file:", include)
-					os.MkdirAll(include, 0o755)
+					err := os.MkdirAll(include, 0o755)
+					if err != nil {
+						return err
+					}
 					out, err := os.Create(filepath.Join(include, item.Name))
 					if err != nil {
 						return err
@@ -219,7 +225,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 					Log("Found static library in tarball")
 					lib := filepath.Join(installArgs.prefix, installArgs.libDir)
 					Log("Creating directory for lib:", lib)
-					os.MkdirAll(lib, 0o755)
+					err := os.MkdirAll(lib, 0o755)
+					if err != nil {
+						return err
+					}
 					out, err := os.Create(filepath.Join(lib, item.Name))
 					if err != nil {
 						return err
@@ -236,7 +245,10 @@ func runLibInstall(cmd *cobra.Command, installArgs *libInstallArgs) error {
 
 					pkgconfig := filepath.Join(installArgs.prefix, installArgs.libDir, "pkgconfig")
 					Log("Creating directory for pc file:", pkgconfig)
-					os.MkdirAll(pkgconfig, 0o755)
+					err := os.MkdirAll(pkgconfig, 0o755)
+					if err != nil {
+						return err
+					}
 
 					outName := strings.ReplaceAll(item.Name, ".pc.in", ".pc")
 					out, err := os.Create(filepath.Join(pkgconfig, outName))
